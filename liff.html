@@ -760,14 +760,16 @@ function renderApprovalAction(leaveId,action){
   let h='<div class="detail-back" onclick="openApprovalDetail(\''+leaveId+'\')">'
     +'<i class="fi fi-rr-arrow-left"></i>ย้อนกลับ</div>';
   h+='<div class="detail-card">'
-    +'<div style="font-size:16px;font-weight:700;margin-bottom:4px">'+(isApprove?'ยืนยันการอนุมัติ':'ระบุเหตุผลที่ไม่อนุมัติ')+'</div>'
-    +'<div style="font-size:14px;color:var(--soft);margin-bottom:16px">'+esc(personName)+' &mdash; '+esc(types[l.leave_type]||l.leave_type)+'</div>'
-    +'<div class="f-row"><label>'+(isApprove?'ความคิดเห็น (ไม่บังคับ)':'เหตุผล (บังคับ)')+'</label>'
-      +'<textarea class="f-ctl" id="approvalComment" rows="3" style="resize:vertical" placeholder="'+(isApprove?'ระบุความคิดเห็น หรือเว้นว่างไว้...':'กรุณาระบุเหตุผล...')+'"></textarea></div>'
-    +'<button id="btnConfirm" onclick="confirmApproval(\''+apiAction+'\','+(!isApprove)+')" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+color+';color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px">'
+    +'<div style="font-size:17px;font-weight:700;margin-bottom:4px">'+(isApprove?'ยืนยันการอนุมัติ':'ระบุเหตุผลที่ไม่อนุมัติ')+'</div>'
+    +'<div style="font-size:14px;color:var(--soft);margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)">'+esc(personName)+' &mdash; '+esc(types[l.leave_type]||l.leave_type)+'</div>'
+    +'<div style="margin-bottom:14px">'
+      +'<div style="font-size:12.5px;font-weight:700;color:var(--soft);margin-bottom:6px;letter-spacing:.2px">'+(isApprove?'ความคิดเห็น (ไม่บังคับ)':'เหตุผล (บังคับ)')+'</div>'
+      +'<textarea id="approvalComment" rows="3" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;outline:none" placeholder="'+(isApprove?'ระบุความคิดเห็น หรือเว้นว่างไว้...':'กรุณาระบุเหตุผล...')+'"></textarea>'
+    +'</div>'
+    +'<button id="btnConfirm" onclick="confirmApproval(\''+apiAction+'\','+(!isApprove)+')" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+color+';color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box">'
       +(isApprove?'<i class="fi fi-rr-check"></i> ยืนยันอนุมัติ':'<i class="fi fi-rr-cross-small"></i> ยืนยันไม่อนุมัติ')
     +'</button>'
-    +'<button onclick="openApprovalDetail(\''+leaveId+'\')" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--soft);font-size:14px;cursor:pointer;margin-top:8px">ยกเลิก</button>'
+    +'<button onclick="openApprovalDetail(\''+leaveId+'\')" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--soft);font-size:14px;cursor:pointer;margin-top:8px;box-sizing:border-box">ยกเลิก</button>'
   +'</div>';
   render(h); window.scrollTo(0,0);
 }
