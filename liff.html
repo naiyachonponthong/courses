@@ -256,6 +256,7 @@ let LIFF_ID = '', PROFILE = null, USER_TYPE = '';
 let P = { children:[], leaves:[], attendance:[] };   // parent state
 let T = { user:null, leaves:[] };                    // teacher state
 let A = { leaves:[] };                               // approval queue state
+let ATT = { data:null, date:'' };                    // attendance state
 let CURRENT_APPROVAL_ID = null;
 let TAB = 'home', attKid = '', pendingPhoto = null;
 
@@ -369,7 +370,9 @@ function showTabbar(type){
       +'<button data-tab="att"><i class="fi fi-rr-chart-histogram"></i>การมาเรียน</button>'
       +'<button data-tab="leaves"><i class="fi fi-rr-document"></i>การลา</button>';
   } else {
+    const isHomeroom = T.user && T.user.role === 'homeroom';
     tb.innerHTML='<button class="on" data-tab="home"><i class="fi fi-rr-home"></i>หน้าหลัก</button>'
+      +(isHomeroom?'<button data-tab="tattend"><i class="fi fi-rr-user-check"></i>เช็คชื่อ</button>':'')
       +'<button data-tab="tapprove" id="tbApprove"><i class="fi fi-rr-check-circle"></i>รออนุมัติ</button>'
       +'<button data-tab="tleave"><i class="fi fi-rr-add-document"></i>ยื่นใบลา</button>'
       +'<button data-tab="thistory"><i class="fi fi-rr-time-past"></i>ประวัติ</button>';
@@ -384,6 +387,7 @@ function renderTab(tab){
   if(tab==='home')     USER_TYPE==='parent'?renderParentHome():renderTeacherHome();
   if(tab==='att')      renderParentAtt();
   if(tab==='leaves')   renderParentLeaves();
+  if(tab==='tattend')  renderAttendanceTab();
   if(tab==='tapprove') renderApprovalQueue();
   if(tab==='tleave')   renderTeacherLeaveForm();
   if(tab==='thistory') renderTeacherHistory();
@@ -569,7 +573,34 @@ function renderTeacherHome(){
   }
 
   h+='<button class="btn btn-primary" style="margin-top:8px" onclick="renderTab(\'tleave\')"><i class="fi fi-rr-add-document"></i> ยื่นใบลา</button>';
+  h+='<div id="quotaCard" style="margin-top:12px"></div>';
   render(h);
+  _loadQuotaCard();
+}
+
+function _loadQuotaCard(){
+  api('getMyQuotaLiff',{line_user_id:PROFILE.userId}).then(function(res){
+    const el=document.getElementById('quotaCard'); if(!el) return;
+    if(res.status!=='success'||!res.enabled||!res.quota||!res.quota.length){ el.remove(); return; }
+    let h='<div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:4px">'
+      +'<div style="font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px">'
+        +'<i class="fi fi-rr-calendar-lines" style="color:var(--blue)"></i>โควต้าวันลา ปีการศึกษา '+esc(res.year||'')+'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+    res.quota.forEach(function(q){
+      const pct=q.limit>0?Math.round(q.used/q.limit*100):0;
+      const barColor=pct>=90?'#d6453b':(pct>=70?'#e0a000':'#1f9d63');
+      h+='<div style="text-align:center">'
+        +'<div style="font-size:11px;color:var(--soft);margin-bottom:4px">'+esc(q.label)+'</div>'
+        +'<div style="font-size:16px;font-weight:700;color:'+barColor+'">'+q.remain+'</div>'
+        +'<div style="font-size:10.5px;color:var(--soft)">คงเหลือ/'+q.limit+'</div>'
+        +'<div style="height:4px;background:var(--line);border-radius:2px;margin-top:4px">'
+          +'<div style="height:4px;width:'+Math.min(pct,100)+'%;background:'+barColor+';border-radius:2px;transition:width .4s"></div>'
+        +'</div>'
+      +'</div>';
+    });
+    h+='</div></div>';
+    el.innerHTML=h;
+  });
 }
 
 /* ══════════════════════════════════════════════════
@@ -951,6 +982,132 @@ function confirmApproval(apiAction,requireComment){
       btn.disabled=false; btn.textContent='ลองใหม่';
     }
   }).catch(function(e){ toast(String(e)); btn.disabled=false; });
+}
+
+/* ══════════════════════════════════════════════════
+   TEACHER — HOMEROOM ATTENDANCE
+   ══════════════════════════════════════════════════ */
+const ATT_STATUS_LIFF = [
+  { v:'present', label:'มา',  color:'#1f9d63', bg:'#e8f7ef' },
+  { v:'absent',  label:'ขาด', color:'#d6453b', bg:'#fdecea' },
+  { v:'late',    label:'สาย', color:'#e0a000', bg:'#fffbeb' },
+  { v:'leave',   label:'ลา',  color:'#7b6fd6', bg:'#f0eeff' }
+];
+
+function todayISO(){
+  const d=new Date();
+  return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+}
+
+function renderAttendanceTab(){
+  const date=ATT.date||todayISO();
+  render('<div class="loading"><div class="spin"></div>กำลังโหลด...</div>');
+  api('getClassForAttendanceLiff',{line_user_id:PROFILE.userId,date:date}).then(function(res){
+    if(res.status==='no_class'){
+      render('<div class="empty-box"><i class="fi fi-rr-school" style="font-size:36px;color:var(--soft)"></i>'
+        +'<div class="t" style="margin-top:10px">ไม่พบห้องเรียนที่รับผิดชอบ</div>'
+        +'<div class="lc-meta" style="margin-top:4px">ต้องตั้งค่าครูประจำชั้นในระบบก่อน</div></div>');
+      return;
+    }
+    if(res.status!=='success'){ render('<div class="notice">'+esc(res.message||'เกิดข้อผิดพลาด')+'</div>'); return; }
+    ATT.data=res; ATT.date=res.date;
+    _renderAttForm(res);
+  }).catch(function(e){ render('<div class="notice">'+esc(String(e))+'</div>'); });
+}
+
+function _renderAttForm(res){
+  const thDate=thaiDate(res.date);
+  const statBtns=ATT_STATUS_LIFF.map(function(s){
+    return '<button class="att-status-btn" data-s="'+s.v+'" style="background:'+s.bg+';color:'+s.color+';border-color:'+s.color+'">'+s.label+'</button>';
+  }).join('');
+
+  let h='<div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:12px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'
+      +'<div>'
+        +'<div style="font-size:16px;font-weight:700">'+esc(res.class_name)+'</div>'
+        +'<div style="font-size:13px;color:var(--soft);margin-top:2px">'+thDate+' &bull; '+res.records.length+' คน'+(res.already_checked?' &bull; <span style="color:var(--green);font-weight:600">เช็คแล้ว</span>':'')+'</div>'
+      +'</div>'
+      +'<input type="date" id="attDate" value="'+res.date+'" style="border:1.5px solid var(--line);border-radius:9px;padding:6px 10px;font-size:13px;font-family:inherit;color:var(--ink)">'
+    +'</div></div>';
+
+  h+='<div id="attSummaryBar" style="display:flex;gap:6px;margin-bottom:10px"></div>';
+
+  h+='<div id="attList">';
+  res.records.forEach(function(st){
+    h+=_attStudentRow(st);
+  });
+  h+='</div>';
+
+  h+='<button id="btnSaveAtt" onclick="saveAttendanceLiff()" style="width:100%;padding:14px;border:none;border-radius:14px;background:var(--green,#1f9d63);color:#fff;font-size:15px;font-weight:700;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px">'
+    +'<i class="fi fi-rr-disk"></i> บันทึกการเช็คชื่อ</button>';
+
+  render(h);
+
+  // date picker
+  document.getElementById('attDate').onchange=function(){
+    ATT.date=this.value; renderAttendanceTab();
+  };
+
+  // status button delegation
+  document.getElementById('attList').addEventListener('click',function(e){
+    const btn=e.target.closest('.att-status-btn'); if(!btn) return;
+    const row=btn.closest('.att-row-liff'); if(!row) return;
+    row.querySelectorAll('.att-status-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    _updateAttSummary();
+  });
+
+  _updateAttSummary();
+}
+
+function _attStudentRow(st){
+  const btns=ATT_STATUS_LIFF.map(function(s){
+    const isOn=st.status===s.v;
+    return '<button class="att-status-btn'+(isOn?' active':'')+'" data-s="'+s.v+'"'
+      +' style="background:'+(isOn?s.color:'#fff')+';color:'+(isOn?'#fff':s.color)+';border:1.5px solid '+s.color+';border-radius:8px;padding:5px 10px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">'+s.label+'</button>';
+  }).join('');
+  return '<div class="att-row-liff" data-id="'+st.id+'" style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:7px">'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+      +(st.number?'<span style="min-width:28px;font-size:12px;color:var(--soft);text-align:center">'+esc(st.number)+'</span>':'')
+      +'<span style="font-size:14px;font-weight:600;flex:1">'+esc(st.name)+'</span>'
+    +'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+btns+'</div>'
+  +'</div>';
+}
+
+function _updateAttSummary(){
+  const counts={present:0,absent:0,late:0,leave:0};
+  document.querySelectorAll('.att-row-liff').forEach(function(row){
+    const active=row.querySelector('.att-status-btn.active');
+    const s=active?active.getAttribute('data-s'):'present';
+    if(counts[s]!=null) counts[s]++;
+  });
+  const bar=document.getElementById('attSummaryBar'); if(!bar) return;
+  bar.innerHTML=ATT_STATUS_LIFF.map(function(s){
+    return '<div style="flex:1;text-align:center;background:'+s.bg+';color:'+s.color+';border-radius:9px;padding:6px 4px">'
+      +'<div style="font-size:17px;font-weight:700">'+counts[s.v]+'</div>'
+      +'<div style="font-size:11px;font-weight:600">'+s.label+'</div>'
+    +'</div>';
+  }).join('');
+}
+
+async function saveAttendanceLiff(){
+  const records=[];
+  document.querySelectorAll('.att-row-liff').forEach(function(row){
+    const active=row.querySelector('.att-status-btn.active');
+    records.push({ id:row.getAttribute('data-id'), status:active?active.getAttribute('data-s'):'present' });
+  });
+  if(!records.length){ toast('ไม่มีข้อมูลนักเรียน'); return; }
+  const btn=document.getElementById('btnSaveAtt');
+  btn.disabled=true; btn.innerHTML='<i class="fi fi-rr-spinner"></i> กำลังบันทึก...';
+  const res=await api('saveAttendanceLiff',{line_user_id:PROFILE.userId,date:ATT.date,records:records});
+  if(res.status==='success'){
+    toast(res.message||'บันทึกแล้ว');
+    renderAttendanceTab();
+  } else {
+    toast(res.message||'เกิดข้อผิดพลาด');
+    btn.disabled=false; btn.innerHTML='<i class="fi fi-rr-disk"></i> บันทึกการเช็คชื่อ';
+  }
 }
 
 function chipBtn(val,label,on,cls){ return '<div class="'+(cls||'chip')+(on?' on':'')+'" data-v="'+val+'">'+label+'</div>'; }
