@@ -22,7 +22,7 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 .head{ background:radial-gradient(120% 130% at 85% -20%, #9a6bff, #5b3df2 55%, #3d24c4); color:#fff; padding:22px 18px 20px; }
 .head h1{ font-size:19px; margin:0; font-weight:700; }
 .head p{ margin:4px 0 0; font-size:13px; opacity:.9; }
-.wrap{ padding:16px; max-width:560px; margin:0 auto; }
+.wrap{ padding:16px 16px 100px; max-width:560px; margin:0 auto; }
 
 .loading{ text-align:center; padding:64px 20px; color:var(--soft); }
 .spin{ width:34px; height:34px; border:3px solid var(--brand-50); border-top-color:var(--brand); border-radius:50%; animation:sp .8s linear infinite; margin:0 auto 14px; }
@@ -91,6 +91,23 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 
 .toast{ position:fixed; left:50%; bottom:26px; translate:-50% 0; background:var(--ink); color:#fff; padding:11px 20px; border-radius:999px; font-size:13.5px; z-index:120; opacity:0; pointer-events:none; transition:opacity .25s; }
 .toast.show{ opacity:1; }
+
+/* bottom nav */
+.bottomnav{ position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid var(--line); z-index:60; padding-bottom:env(safe-area-inset-bottom); }
+.bottomnav-in{ max-width:560px; margin:0 auto; display:flex; }
+.nav-btn{ flex:1; background:none; border:0; padding:9px 4px 8px; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--mut); font-family:inherit; cursor:pointer; }
+.nav-btn .i{ width:21px; height:21px; }
+.nav-btn span{ font-size:11px; font-weight:500; }
+.nav-btn.on{ color:var(--brand); }
+
+/* settings tab */
+.set-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin-bottom:14px; }
+.set-row{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.set-av{ width:48px; height:48px; border-radius:14px; background:linear-gradient(135deg,var(--brand),var(--brand-2)); color:#fff; display:grid; place-items:center; font-weight:700; font-size:19px; flex:none; }
+.set-nm{ font-weight:700; font-size:16px; }
+.set-sub{ font-size:12.5px; color:var(--soft); }
+.section-title{ font-size:12.5px; font-weight:700; color:var(--soft); margin:0 0 10px; }
+.btn-danger{ background:var(--red-50); color:var(--red); }
 </style>
 </head>
 <body>
@@ -103,6 +120,8 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
   <symbol id="ic-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
   <symbol id="ic-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13l3.5 7v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z"/></symbol>
   <symbol id="ic-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M19 19v2H6.5A2.5 2.5 0 0 1 4 18.5"/></symbol>
+  <symbol id="ic-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/><path d="M9 21v-6h6v6"/></symbol>
+  <symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 4.29l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
 </svg>
 
 <div class="head">
@@ -116,6 +135,7 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 
 <div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
+<nav class="bottomnav hidden" id="bottomnav"></nav>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
@@ -158,7 +178,37 @@ async function load(){
   if(res.status!=='success'){ render('<div class="notice">'+esc(res.message||'เกิดข้อผิดพลาด')+'</div>'); return; }
   STATE = res.data;
   document.getElementById('headSub').textContent = 'สวัสดีค่ะ คุณ'+(PROFILE.displayName||'');
-  renderHome();
+  renderActiveTab();
+  renderNav();
+}
+
+function emptyState(text){
+  return '<div class="notice"><div class="ic">'+svg('ic-inbox')+'</div>'+esc(text)+'</div>';
+}
+
+/* ---------- bottom nav ---------- */
+const NAV_ITEMS = [
+  { id:'home', label:'หน้าหลัก', icon:'ic-home' },
+  { id:'attendance', label:'การมาเรียน', icon:'ic-calendar' },
+  { id:'results', label:'ผลการเรียน', icon:'ic-award' },
+  { id:'settings', label:'ตั้งค่า', icon:'ic-settings' }
+];
+let TAB = 'home';
+function renderNav(){
+  let h = '<div class="bottomnav-in">';
+  NAV_ITEMS.forEach(function(n){
+    h += '<button class="nav-btn'+(TAB===n.id?' on':'')+'" onclick="setTab(\''+n.id+'\')">'+svg(n.icon)+'<span>'+n.label+'</span></button>';
+  });
+  h += '</div>';
+  document.getElementById('bottomnav').innerHTML = h;
+  document.getElementById('bottomnav').classList.remove('hidden');
+}
+function setTab(t){ TAB = t; renderActiveTab(); renderNav(); window.scrollTo(0,0); }
+function renderActiveTab(){
+  if(TAB==='attendance') renderAttendanceTab();
+  else if(TAB==='results') renderResultsTab();
+  else if(TAB==='settings') renderSettingsTab();
+  else renderHome();
 }
 
 const PAY = { approved:['pay-ok','อนุมัติแล้ว'], pending_review:['pay-wait','รอตรวจสอบ'], rejected:['pay-no','ไม่อนุมัติ'] };
@@ -173,7 +223,7 @@ function renderHome(){
       + '<span class="pay '+pay[0]+'">'+pay[1]+'</span></div>';
 
     if(!kid.courses.length){ h += '<div class="empty-att">ยังไม่มีคอร์ส</div>'; }
-    kid.courses.forEach(function(c, ci){
+    kid.courses.forEach(function(c){
       const s = c.summary || {};
       const tm = (c.time_start||'') + (c.time_end?('–'+c.time_end):'');
       h += '<div class="course"><div class="course-h"><div>'
@@ -189,35 +239,101 @@ function renderHome(){
         h += '<div class="att-pills">'
           + pill('present', s.present) + pill('late', s.late) + pill('absent', s.absent) + pill('leave', s.leave)
           + '</div>';
-        if(c.records && c.records.length){
-          const rid = 'rec_'+kid.enrollment_id+'_'+ci;
-          h += '<div class="recent"><div class="rec-toggle" onclick="document.getElementById(\''+rid+'\').classList.toggle(\'hidden\')">'
-            + svg('ic-chev')+'ดูประวัติการเช็คชื่อ ('+c.records.length+')</div>'
-            + '<div class="rec-list hidden" id="'+rid+'">';
-          c.records.forEach(function(r){
-            h += '<div class="rec-item"><span>'+thaiDate(r.date)+(r.note?' · '+esc(r.note):'')+'</span>'
-              + '<span class="rec-st '+r.status+'">'+esc(r.status_th)+'</span></div>';
-          });
-          h += '</div></div>';
-        }
       } else {
         h += '<div class="empty-att">ยังไม่มีบันทึกการมาเรียน</div>';
-      }
-
-      if(c.result){
-        h += '<div class="result"><div class="rh">'+svg('ic-award')+'ผลการเรียน</div><div class="rv">'
-          + (c.result.score!=null && c.result.score!==''?'คะแนน <b>'+esc(c.result.score)+'</b> ':'')
-          + (c.result.grade?' · เกรด <b>'+esc(c.result.grade)+'</b>':'')
-          + (c.result.comment?'<div style="margin-top:4px;color:var(--soft)">'+esc(c.result.comment)+'</div>':'')
-          + '</div></div>';
       }
       h += '</div>';
     });
     h += '</div>';
   });
+  if(!h){ h = emptyState('ยังไม่มีคอร์สที่ติดตามได้'); }
   render(h);
 }
 function pill(cls, n){ return '<div class="pill '+cls+'"><div class="n">'+(n||0)+'</div><div class="l">'+ST_TH[cls]+'</div></div>'; }
+
+/* ---------- แท็บ: การมาเรียน ---------- */
+function renderAttendanceTab(){
+  let h = '';
+  STATE.forEach(function(kid){
+    kid.courses.forEach(function(c){
+      const s = c.summary || {};
+      h += '<div class="kid"><div class="kid-top">'
+        + '<span class="kid-av">'+initials(kid.student_name)+'</span>'
+        + '<div><div class="kid-nm">'+esc(kid.student_name)+'</div>'
+        + '<div class="kid-meta">'+esc(c.name)+'</div></div></div>';
+      if(s.total){
+        h += '<div class="att-pills">'
+          + pill('present', s.present) + pill('late', s.late) + pill('absent', s.absent) + pill('leave', s.leave)
+          + '</div>';
+        h += '<div class="rec-list" style="margin-top:10px">';
+        (c.records||[]).forEach(function(r){
+          h += '<div class="rec-item"><span>'+thaiDate(r.date)+(r.note?' · '+esc(r.note):'')+'</span>'
+            + '<span class="rec-st '+r.status+'">'+esc(r.status_th)+'</span></div>';
+        });
+        h += '</div>';
+      } else {
+        h += '<div class="empty-att">ยังไม่มีบันทึกการมาเรียน</div>';
+      }
+      h += '</div>';
+    });
+  });
+  if(!h){ h = emptyState('ยังไม่มีคอร์สที่ติดตามได้'); }
+  render(h);
+}
+
+/* ---------- แท็บ: ผลการเรียน ---------- */
+function renderResultsTab(){
+  let h = '';
+  STATE.forEach(function(kid){
+    kid.courses.forEach(function(c){
+      h += '<div class="kid"><div class="kid-top">'
+        + '<span class="kid-av">'+initials(kid.student_name)+'</span>'
+        + '<div><div class="kid-nm">'+esc(kid.student_name)+'</div>'
+        + '<div class="kid-meta">'+esc(c.name)+'</div></div></div>';
+      if(c.result){
+        h += '<div class="result" style="margin-top:0"><div class="rh">'+svg('ic-award')+'ผลการเรียน</div><div class="rv">'
+          + (c.result.score!=null && c.result.score!==''?'คะแนน <b>'+esc(c.result.score)+'</b> ':'')
+          + (c.result.grade?' · เกรด <b>'+esc(c.result.grade)+'</b>':'')
+          + (c.result.comment?'<div style="margin-top:4px;color:var(--soft)">'+esc(c.result.comment)+'</div>':'')
+          + '</div></div>';
+      } else {
+        h += '<div class="empty-att">ยังไม่มีผลการเรียน</div>';
+      }
+      h += '</div>';
+    });
+  });
+  if(!h){ h = emptyState('ยังไม่มีคอร์สที่ติดตามได้'); }
+  render(h);
+}
+
+/* ---------- แท็บ: ตั้งค่า ---------- */
+function renderSettingsTab(){
+  const name = (PROFILE && PROFILE.displayName) || '-';
+  const h = '<div class="set-card"><div class="set-row">'
+      + '<span class="set-av">'+initials(name)+'</span>'
+      + '<div><div class="set-nm">'+esc(name)+'</div><div class="set-sub">เชื่อมต่อผ่านบัญชี LINE</div></div>'
+      + '</div>'
+      + '<a class="btn btn-primary" style="text-decoration:none" href="enroll.html">สมัครคอร์สเพิ่มเติม</a>'
+    + '</div>'
+    + '<div class="set-card"><div class="section-title">บัญชีและความเป็นส่วนตัว</div>'
+      + '<p class="set-sub" style="margin:0 0 14px">ยกเลิกการเชื่อมต่อจะทำให้ไม่ได้รับการแจ้งเตือนผ่าน LINE และไม่เห็นข้อมูลคอร์สในหน้านี้อีก จนกว่าจะเชื่อมต่อใหม่</p>'
+      + '<button class="btn btn-danger" id="btnUnlink">ยกเลิกการเชื่อมต่อบัญชี LINE</button>'
+    + '</div>';
+  render(h);
+  document.getElementById('btnUnlink').onclick = function(){
+    openConfirm('ยกเลิกการเชื่อมต่อบัญชี LINE?', 'คุณจะไม่ได้รับแจ้งเตือนและไม่เห็นข้อมูลคอร์สที่นี่อีก จนกว่าจะเชื่อมต่อใหม่', doUnlink);
+  };
+}
+async function doUnlink(){
+  const btn = document.getElementById('cfYes');
+  if(btn){ btn.disabled = true; btn.textContent = 'กำลังดำเนินการ...'; }
+  try{
+    const res = await api('unlinkParentLiff', { line_user_id: PROFILE.userId });
+    closeSheet();
+    if(res.status==='success'){ toast(res.message); setTimeout(function(){ location.reload(); }, 1200); }
+    else { toast(res.message || 'ไม่สำเร็จ'); }
+  }catch(e){ closeSheet(); toast('เกิดข้อผิดพลาด'); }
+}
 
 /* ---------- แจ้งลา ---------- */
 function openLeave(enrollId, courseId, courseName){
@@ -225,13 +341,23 @@ function openLeave(enrollId, courseId, courseName){
     + '<div class="field"><label>วันที่ลา</label><input type="date" class="ctl" id="lvDate" value="'+today()+'" min="'+today()+'"></div>'
     + '<div class="field"><label>เหตุผล (ไม่บังคับ)</label><input type="text" class="ctl" id="lvReason" placeholder="เช่น ไม่สบาย / ติดธุระ"></div>'
     + '<button class="btn btn-primary" id="lvSubmit">ยืนยันแจ้งลา</button>'
-    + '<button class="btn btn-ghost" onclick="closeLeave()">ยกเลิก</button>';
+    + '<button class="btn btn-ghost" onclick="closeSheet()">ยกเลิก</button>';
   document.getElementById('sheet').innerHTML = h;
   document.getElementById('overlay').classList.add('show');
   document.getElementById('lvSubmit').onclick = function(){ submitLeave(enrollId, courseId); };
 }
-function closeLeave(){ document.getElementById('overlay').classList.remove('show'); }
-document.getElementById('overlay').addEventListener('click', function(e){ if(e.target.id==='overlay') closeLeave(); });
+function closeSheet(){ document.getElementById('overlay').classList.remove('show'); }
+document.getElementById('overlay').addEventListener('click', function(e){ if(e.target.id==='overlay') closeSheet(); });
+
+/* ---------- confirm dialog (ใช้ overlay เดียวกับแจ้งลา) ---------- */
+function openConfirm(title, msg, onYes){
+  const h = '<h3>'+esc(title)+'</h3><p class="sub">'+esc(msg)+'</p>'
+    + '<button class="btn btn-danger" id="cfYes">ยืนยัน</button>'
+    + '<button class="btn btn-ghost" onclick="closeSheet()">ยกเลิก</button>';
+  document.getElementById('sheet').innerHTML = h;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('cfYes').onclick = onYes;
+}
 
 async function submitLeave(enrollId, courseId){
   const date = document.getElementById('lvDate').value;
@@ -241,7 +367,7 @@ async function submitLeave(enrollId, courseId){
   try{
     const res = await api('submitCourseLeave', { line_user_id: PROFILE.userId, enrollment_id: enrollId, course_id: courseId, date: date, reason: reason });
     if(res.status==='success'){
-      closeLeave(); toast(res.message);
+      closeSheet(); toast(res.message);
       if(liff.isInClient()){ try{ await liff.sendMessages([{type:'text', text:'แจ้งลาคอร์สเรียบร้อยแล้ว วันที่ '+date}]); }catch(e){} }
       load();
     } else { toast(res.message||'ส่งไม่สำเร็จ'); btn.disabled=false; btn.textContent='ยืนยันแจ้งลา'; }
