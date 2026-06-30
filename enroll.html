@@ -389,23 +389,6 @@ const API = (typeof GAS_API_URL !== 'undefined') ? GAS_API_URL : '';
 const LEVELS = ['เตรียมอนุบาล','อ.1','อ.2','อ.3','ป.1','ป.2','ป.3','ป.4','ป.5','ป.6','ม.1','ม.2','ม.3','ม.4','ม.5','ม.6','บุคคลภายนอก'];
 const ROOMS  = ['ห้อง 1','ห้อง 2','ห้อง 3','ห้อง 4','บุคคลภายนอก'];
 
-/* คอร์สตัวอย่าง (แสดงก่อน backend พร้อม — listOpenCourses จะส่งข้อมูลจริงมาทับ) */
-const SAMPLE_COURSES = [
-  { id:'s1', category:'เรียนเสริมการบ้าน After School', name:'เรียนเสริมการบ้าน เตรียมอนุบาล', days:'อังคาร–ศุกร์', time_start:'15:30', time_end:'16:30', fee:3500, eligible_levels:['เตรียมอนุบาล'] },
-  { id:'s2', category:'เรียนเสริมการบ้าน After School', name:'เรียนเสริมการบ้าน ระดับ อ.1–3', days:'อังคาร–ศุกร์', time_start:'15:30', time_end:'16:30', fee:3000, eligible_levels:['อ.1','อ.2','อ.3'] },
-  { id:'s3', category:'เรียนเสริมการบ้าน After School', name:'เรียนเสริมการบ้าน ระดับ ป.1–6', days:'อังคาร–ศุกร์', time_start:'16:00', time_end:'17:00', fee:3000, eligible_levels:['ป.1','ป.2','ป.3','ป.4','ป.5','ป.6'] },
-  { id:'k1', category:'เสริมทักษะปฐมวัย (เตรียมอนุบาล–อนุบาล 3)', name:'Kiddie workshop', days:'วันเสาร์', time_start:'08:30', time_end:'11:00', fee:3000, eligible_levels:['เตรียมอนุบาล'] },
-  { id:'k2', category:'เสริมทักษะปฐมวัย (เตรียมอนุบาล–อนุบาล 3)', name:'Play and Learn (ครูต่างชาติ 15 ครั้ง)', days:'วันเสาร์', time_start:'08:30', time_end:'11:00', fee:4000, eligible_levels:['อ.1','อ.2','อ.3'] },
-  { id:'k3', category:'เสริมทักษะปฐมวัย (เตรียมอนุบาล–อนุบาล 3)', name:'Kids Brown Wing (ครูต่างชาติ)', days:'วันเสาร์', time_start:'09:00', time_end:'10:30', fee:4000, eligible_levels:['อ.1','อ.2','อ.3'] },
-  { id:'k4', category:'เสริมทักษะปฐมวัย (เตรียมอนุบาล–อนุบาล 3)', name:'Swimming เรียนว่ายน้ำพื้นฐาน', days:'วันเสาร์', time_start:'10:00', time_end:'11:00', fee:2000, eligible_levels:['อ.2','อ.3'] },
-  { id:'k5', category:'เสริมทักษะปฐมวัย (เตรียมอนุบาล–อนุบาล 3)', name:'นาฏศิลป์ รำไทย สร้างสรรค์', days:'วันอังคาร', time_start:'16:00', time_end:'17:00', fee:3000, eligible_levels:['อ.2','อ.3'] },
-  { id:'p1', category:'เสริมทักษะวิชาการ ระดับประถมศึกษา', name:'English Grammar (15 ครั้ง)', days:'วันเสาร์', time_start:'15:30', time_end:'17:00', fee:5000, eligible_levels:['ป.1','ป.2','ป.3','ป.4','ป.5','ป.6'] },
-  { id:'p2', category:'เสริมทักษะวิชาการ ระดับประถมศึกษา', name:'Little Scientist Lab (10 ครั้ง)', days:'วันเสาร์', time_start:'09:00', time_end:'11:00', fee:3000, eligible_levels:['ป.1','ป.2','ป.3'] },
-  { id:'p3', category:'เสริมทักษะวิชาการ ระดับประถมศึกษา', name:'คณิตคิดเร็ว RT (15 ครั้ง)', days:'วันเสาร์', time_start:'16:00', time_end:'17:00', fee:3000, eligible_levels:['ป.4','ป.5','ป.6'] },
-  { id:'m1', category:'เสริมทักษะวิชาการ ระดับมัธยมศึกษา', name:'คณิตเสริมพื้นฐาน', days:'วันอังคาร', time_start:'16:00', time_end:'17:30', fee:3000, eligible_levels:['ม.1','ม.2','ม.3'] },
-  { id:'m2', category:'เสริมทักษะวิชาการ ระดับมัธยมศึกษา', name:'English Intensive Course', days:'วันเสาร์', time_start:'16:30', time_end:'17:30', fee:3000, eligible_levels:['ม.4','ม.5','ม.6'] }
-];
-
 let COURSES = [];
 let LIFF_USER = null;
 const form = { name:'', student_code:'', level:'', room:'', phone:'', courseIds:[], slip:'' };
@@ -430,9 +413,9 @@ function total(){ return selectedCourses().reduce((s,c)=>s+Number(c.fee||0),0); 
 async function loadCourses(){
   try{
     const res = await api('listOpenCourses');
-    COURSES = (res && res.status==='success' && Array.isArray(res.data) && res.data.length) ? res.data : SAMPLE_COURSES;
-  }catch(e){ COURSES = SAMPLE_COURSES; }
-  document.getElementById('statCount').textContent = COURSES.length + '+';
+    COURSES = (res && res.status==='success' && Array.isArray(res.data)) ? res.data : [];
+  }catch(e){ COURSES = []; }
+  document.getElementById('statCount').textContent = COURSES.length ? (COURSES.length + '+') : '0';
   renderCatalog();
 }
 function groupByCat(list){ const g={}; list.forEach(c=>{ (g[c.category]=g[c.category]||[]).push(c); }); return g; }
@@ -445,6 +428,13 @@ const CAT_ICON = {
 };
 function catStyle(cat){ return CAT_ICON[cat] || ['ic-target','var(--brand-50)','var(--brand)']; }
 function renderCatalog(){
+  if(!COURSES.length){
+    document.getElementById('catalog').innerHTML =
+      '<div style="text-align:center;padding:48px 20px;color:var(--soft)">'
+      + svg('ic-book') + '<div style="margin-top:12px;font-size:15px">ยังไม่เปิดรับสมัครคอร์สในขณะนี้</div>'
+      + '<div style="margin-top:4px;font-size:13px;color:var(--mut)">กรุณาติดตามประกาศจากทางโรงเรียนอีกครั้ง</div></div>';
+    return;
+  }
   const g = groupByCat(COURSES); let h='';
   Object.keys(g).forEach(cat=>{
     const [ic,bg,fg]=catStyle(cat);
@@ -464,7 +454,10 @@ function renderCatalog(){
 }
 
 /* ============ wizard ============ */
-function openWizard(){ step=1; renderStep(); document.getElementById('overlay').classList.add('show'); document.body.style.overflow='hidden'; }
+function openWizard(){
+  if(!COURSES.length){ toast('ขณะนี้ยังไม่เปิดรับสมัครคอร์ส กรุณาติดตามประกาศจากทางโรงเรียน'); return; }
+  step=1; renderStep(); document.getElementById('overlay').classList.add('show'); document.body.style.overflow='hidden';
+}
 function closeWizard(){ document.getElementById('overlay').classList.remove('show'); document.body.style.overflow=''; }
 document.getElementById('overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeWizard(); });
 
