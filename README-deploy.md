@@ -1,58 +1,119 @@
-# Part 5 — LIFF บน GitHub Pages (คู่มือ deploy)
+# LIFF — คู่มือ Deploy (GitHub Pages)
 
-หน้า LIFF สำหรับ **ผู้ปกครอง** (ยื่นใบลา) และ **ครู** (เช็คชื่อ + ยื่นลา) เสิร์ฟแยกบน GitHub Pages เพราะ GAS HtmlService รัน LIFF ไม่ได้
+หน้า LIFF สำหรับ **ครู** และ **ผู้ปกครอง** เสิร์ฟบน GitHub Pages  
+เพราะ GAS HtmlService ไม่รองรับ `liff.init()`
 
-## ไฟล์ในโฟลเดอร์ liff/
+---
+
+## โครงสร้างไฟล์
+
 ```
 liff/
-├── config.js          ← ⚠️ แก้ 2 ค่า: GAS_API_URL, LIFF_ID
-├── index.html         ← หน้าผู้ปกครอง (Flex ปุ่ม "ยื่นใบลา" เปิดหน้านี้)
-├── teacher.html       ← หน้าครู (login + เช็คชื่อ + ยื่นลา)
-├── style.css
+├── liff.html       ← หน้าเดียวสำหรับทั้งครูและผู้ปกครอง
+├── config.js       ← ⚠️ ต้องแก้ค่าก่อน deploy
+├── style.css       ← สไตล์
 └── README-deploy.md
 ```
 
-## ขั้นตอน deploy
+### liff.html ทำอะไรบ้าง
 
-### 1) อัปขึ้น GitHub Pages
-1. สร้าง repo ใหม่ (เช่น `attendance-liff`) แล้วอัปไฟล์ในโฟลเดอร์ `liff/` ขึ้นไป (ให้ `index.html` อยู่ราก repo หรือใน `/docs`)
-2. Settings > Pages > Source = branch `main` (โฟลเดอร์ราก หรือ `/docs`)
-3. ได้ URL เช่น `https://USERNAME.github.io/attendance-liff/`
+**สำหรับครู** (login ด้วย username/password)
+- หน้าแรก — โปรไฟล์ + โควต้าวันลา
+- เช็คชื่อ — แตะการ์ดนักเรียนเพื่อสลับสถานะ (homeroom เท่านั้น)
+- รออนุมัติ — อนุมัติ/ปฏิเสธใบลาพร้อม comment
+- ประวัติ — รายการที่เคยอนุมัติ
+- ใบลาของฉัน — ยื่นและติดตามใบลาตัวเอง
 
-### 2) สร้าง LIFF app (LINE Developers)
-1. เข้า LINE Developers > Channel (Messaging API เดิม) > แท็บ **LIFF** > Add
-2. Endpoint URL = `https://USERNAME.github.io/attendance-liff/`  (หน้าผู้ปกครอง)
-3. Size = Full, Scope = `profile`, ติ๊ก Bot link ถ้าต้องการ
-4. คัดลอก **LIFF ID** ที่ได้
+**สำหรับผู้ปกครอง** (auth ด้วย LINE User ID)
+- ยื่นใบลาแทนบุตรหลาน
+- ดูสถานะใบลา
+- รับแจ้งเตือนเมื่อขาด/สาย และเมื่ออนุมัติ/ปฏิเสธ
 
-### 3) ตั้งค่า config.js
+---
+
+## วิธี Deploy
+
+### ขั้นที่ 1 — อัปโหลดขึ้น GitHub Pages
+
+1. สร้าง Repository ใหม่ใน GitHub (เช่น `school-liff`)
+2. อัปโหลดไฟล์ทุกไฟล์ในโฟลเดอร์ `liff/` ขึ้นไป  
+   ให้ `liff.html` อยู่ที่ root ของ repo
+3. ไปที่ **Settings > Pages**
+4. Source: `Deploy from a branch` → branch `main` → folder `/ (root)`
+5. กด **Save** → รอ 1–2 นาที
+6. ได้ URL เช่น `https://USERNAME.github.io/school-liff/`
+
+### ขั้นที่ 2 — สร้าง LIFF App
+
+1. เข้า [LINE Developers Console](https://developers.line.biz)
+2. เลือก Provider → เลือก Channel (Messaging API)
+3. แท็บ **LIFF** → **Add**
+4. กรอก:
+   - LIFF app name: `ระบบเช็คชื่อ`
+   - Size: `Full`
+   - Endpoint URL: `https://USERNAME.github.io/school-liff/liff.html`
+   - Scope: ติ๊ก `profile`
+   - Bot link feature: `On (Aggressive)` แนะนำ
+5. กด **Add** → คัดลอก **LIFF ID** ที่ได้
+
+### ขั้นที่ 3 — แก้ config.js
+
+เปิดไฟล์ `liff/config.js` แก้ 2 ค่า:
+
 ```js
-const GAS_API_URL = "https://script.google.com/macros/s/XXXX/exec";  // URL /exec ของ Web App
-const LIFF_ID     = "1234567890-abcdEFGH";                            // LIFF ID
+const GAS_API_URL = "https://script.google.com/macros/s/XXXX/exec";
+//                   ↑ Web App URL จาก Google Apps Script (ขั้นที่ 6 ใน gas/README.md)
+
+const LIFF_ID = "1234567890-abcdEFGH";
+//               ↑ LIFF ID จากขั้นที่ 2
 ```
+
 แล้ว push ขึ้น GitHub อีกครั้ง
 
-### 4) ผูกปุ่มใน Flex แจ้งเตือน
-- ในเว็บ > ตั้งค่า > ช่อง **URL หน้า LIFF (GitHub Pages)** ใส่ `https://liff.line.me/<LIFF_ID>`
-  (หรือ URL GitHub Pages ตรงๆ ก็ได้ แต่ใช้ `liff.line.me/<id>` จะเปิดในแอป LINE ลื่นกว่า)
-- ปุ่ม "ยื่นใบลา" ในข้อความแจ้งเตือนขาด/สาย จะเปิดหน้าผู้ปกครองนี้
+### ขั้นที่ 4 — ใส่ URL ในระบบ
 
-## การทำงาน
-- **ผู้ปกครอง (index.html):** liff.init → ดึง userId → เรียก `parentInit` → แสดงบุตรหลาน + ประวัติลา → ยื่นใบลา (เลือกบุตรหลาน/ประเภท/วันที่/เหตุผล/แนบรูป)
-  - ถ้ายังไม่เชื่อมบัญชี จะบอกให้ไปพิมพ์รหัสนักเรียนในแชทก่อน
-- **ครู (teacher.html):** login ด้วย username/password เดิม → เช็คชื่อ (เลือกชั้น/วันที่ + ปุ่มมาครบทั้งห้อง) + ยื่นลาของตัวเอง + ดูสถานะใบลา
+1. เข้า Admin Web → เมนู **ตั้งค่า**
+2. ใส่ LIFF URL: `https://liff.line.me/LIFF_ID`
+3. กด **บันทึก**
 
-## การเชื่อมต่อ API (เลี่ยง CORS)
-ทุกหน้าเรียก GAS ผ่าน:
+---
+
+## การเชื่อมต่อ API
+
+ทุก request ส่งแบบ POST ไป GAS:
+
 ```js
-fetch(GAS_API_URL, { method:'POST', body: JSON.stringify({action, ...}) })
+fetch(GAS_API_URL, {
+  method: 'POST',
+  body: JSON.stringify({ action: 'actionName', ...params })
+})
 ```
-ไม่ตั้ง header `Content-Type` → เป็น text/plain → ไม่เกิด CORS preflight
-ฝั่ง GAS `doPost` อ่าน `e.postData.contents` แล้ว route ตาม `action`
 
-## หมายเหตุ
-- ใบลาที่ยื่นจะสร้างคำขอ + สายอนุมัติตาม `APPROVAL_FLOWS` ทันที (สถานะ "รออนุมัติ")
-- การ **อนุมัติ/ปฏิเสธ** เต็มรูปแบบ (เว็บ + LINE) + อัปเดต Attendance อัตโนมัติ อยู่ใน **Part 6**
+> ไม่ตั้ง `Content-Type` header → เป็น `text/plain` → ไม่เกิด CORS preflight
 
-## ถัดไป — Part 6
-ระบบลา: อนุมัติหลายชั้น (เว็บ + LINE), อัปเดต Attendance เป็น "ลา" เมื่ออนุมัติ, โควต้าครู (toggle)
+---
+
+## การ Update LIFF
+
+เมื่อแก้ไข `liff.html` หรือ `config.js`:
+
+```bash
+git add .
+git commit -m "update"
+git push
+```
+
+GitHub Pages อัปเดตอัตโนมัติภายใน 1–2 นาที  
+ไม่ต้องแก้ LIFF ID หรือ URL ใหม่
+
+---
+
+## ปัญหาที่พบบ่อย
+
+| ปัญหา | วิธีแก้ |
+|---|---|
+| `liff.init() failed` | ตรวจสอบ LIFF ID ใน config.js และ Endpoint URL ใน LINE Developers |
+| ผู้ปกครองเข้าแล้วไม่เห็นข้อมูล | ต้องผูก LINE ก่อน — ติดต่อครูเพื่อส่งลิงก์ผูกบัญชี |
+| ครูเช็คชื่อไม่ได้ (ไม่เห็นแท็บ) | ตรวจสอบว่า role เป็น `homeroom` และถูกกำหนดเป็นครูประจำชั้นในระบบ |
+| แจ้งเตือนไม่ส่ง | ตรวจสอบ LINE Channel Access Token ในเมนูตั้งค่า |
+| CORS error | ตรวจสอบว่า GAS_API_URL ถูกต้องและ Web App deploy แล้ว |

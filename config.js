@@ -3,7 +3,7 @@
    ============================================================ */
 
 // URL /exec ของ Web App (จาก Apps Script > Deploy > Web app)
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz-RBZQXhupciK9zOPpYdtbwDtNlKBH38Qzn9abJPvpJqFx2d0M782CdYzOHIM5ii7-ag/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz76O7X4QDLflHrqvT8NPm3ALBuoAPz7Rzu9N9DbVuUlcWJTZGXSt6uWTviueAUXAzijw/exec";
 
 // LIFF ID (จาก LINE Developers > LIFF > สร้าง LIFF app ชี้มาที่หน้านี้)
 const LIFF_ID = "";
