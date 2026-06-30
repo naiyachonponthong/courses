@@ -31,7 +31,17 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 .head p{ margin:5px 0 0; font-size:13.5px; opacity:.85; }
 .head-badge{ flex:none; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28);
   padding:6px 13px; border-radius:999px; font-size:11.5px; font-weight:600; backdrop-filter:blur(4px); white-space:nowrap; }
-.wrap{ padding:16px 16px 104px; max-width:560px; margin:-22px auto 0; position:relative; z-index:2; }
+.head-id{ display:flex; align-items:center; gap:12px; }
+.head-av{ width:46px; height:46px; border-radius:14px; background:rgba(255,255,255,.18); border:1.5px solid rgba(255,255,255,.4);
+  display:grid; place-items:center; font-weight:800; font-size:18px; flex:none; overflow:hidden; }
+.head-av img{ width:100%; height:100%; object-fit:cover; display:block; }
+.wrap{ padding:16px 16px 110px; max-width:560px; margin:-22px auto 0; position:relative; z-index:2; }
+
+.stats-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.stat-card{ background:#fff; border-radius:16px; padding:13px 10px; box-shadow:var(--shadow-sm); text-align:center; }
+.stat-card .sv{ font-size:19px; font-weight:800; }
+.stat-card .sl{ font-size:10px; color:var(--soft); margin-top:3px; font-weight:600; }
+.stat-card.accent .sv{ color:var(--brand); }
 
 .loading{ text-align:center; padding:64px 20px; color:var(--soft); }
 .spin{ width:34px; height:34px; border:3px solid var(--brand-50); border-top-color:var(--brand); border-radius:50%; animation:sp .8s linear infinite; margin:0 auto 14px; }
@@ -65,15 +75,35 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
   cursor:pointer; white-space:nowrap; font-family:inherit; display:inline-flex; align-items:center; gap:6px; transition:transform .12s; }
 .btn-leave:active{ transform:scale(.94); }
 
-.att-pills{ display:flex; gap:8px; margin:14px 0 4px; }
-.pill{ flex:1; text-align:center; border-radius:14px; padding:10px 4px 9px; }
-.pill .pi{ width:17px; height:17px; margin:0 auto 4px; display:block; }
-.pill .n{ font-size:18px; font-weight:800; line-height:1; }
-.pill .l{ font-size:10.5px; margin-top:3px; font-weight:600; }
-.pill.present{ background:linear-gradient(160deg,#eafaf1,#dcf3e6); color:var(--green); }
-.pill.late{ background:linear-gradient(160deg,#fff8e6,#fdedc4); color:var(--gold); }
-.pill.absent{ background:linear-gradient(160deg,#fef0f0,#fbdcdc); color:var(--red); }
-.pill.leave{ background:linear-gradient(160deg,#eef4ff,#dee9ff); color:var(--blue); }
+.attbar{ height:10px; border-radius:999px; overflow:hidden; display:flex; margin-top:13px; background:var(--line); }
+.attbar i{ display:block; height:100%; }
+.attbar-legend{ display:flex; gap:13px; margin-top:10px; flex-wrap:wrap; }
+.attbar-legend span{ display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--soft); font-weight:600; }
+.attbar-legend i{ width:8px; height:8px; border-radius:50%; display:inline-block; flex:none; }
+.attnote{ margin-top:9px; font-size:11.5px; color:var(--green); font-weight:600; display:flex; align-items:center; gap:5px; }
+.attnote .i{ width:13px; height:13px; }
+.attnote.warn{ color:var(--gold); }
+.attnote.danger{ color:var(--red); }
+
+.group-label{ font-size:12px; font-weight:700; color:var(--soft); margin:16px 0 9px; text-transform:uppercase; letter-spacing:.4px; }
+
+.donut-card{ display:flex; gap:18px; align-items:center; margin:14px 0 4px; flex-wrap:wrap; }
+.donut-wrap{ position:relative; flex:none; }
+.donut-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.donut-center b{ font-size:21px; font-weight:800; line-height:1; }
+.donut-center small{ font-size:10px; color:var(--soft); margin-top:3px; }
+.cat-list{ flex:1; min-width:170px; display:flex; flex-direction:column; gap:11px; }
+.cat-item .ch{ display:flex; justify-content:space-between; font-size:12.5px; font-weight:600; margin-bottom:5px; }
+.cat-item .ch .pct{ font-weight:800; }
+.cat-item .cbar{ height:6px; border-radius:99px; background:var(--line); overflow:hidden; }
+.cat-item .cbar i{ display:block; height:100%; border-radius:99px; }
+.cat-item .csub{ font-size:10.5px; color:var(--mut); margin-top:4px; }
+
+.pick-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; max-height:50vh; overflow-y:auto; }
+.pick-item{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px 15px; border:1.5px solid var(--line);
+  background:#fff; border-radius:13px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; text-align:left; transition:background .12s; }
+.pick-item .i{ width:15px; height:15px; color:var(--mut); flex:none; transform:rotate(-90deg); }
+.pick-item:active{ background:var(--bg); }
 
 .result{ margin-top:12px; background:linear-gradient(135deg,var(--brand-50),#f4f7ff); border:1px solid #e1e8fc; border-radius:var(--radius-sm); padding:13px 15px; }
 .result .rh{ font-size:12px; color:var(--brand); font-weight:700; display:flex; align-items:center; gap:6px; margin-bottom:5px; }
@@ -112,13 +142,18 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 /* bottom nav */
 .bottomnav{ position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.92); backdrop-filter:saturate(160%) blur(14px);
   border-top:1px solid var(--line); z-index:60; padding:9px 10px env(safe-area-inset-bottom); box-shadow:0 -10px 28px rgba(30,30,70,.06); }
-.bottomnav-in{ max-width:560px; margin:0 auto; display:flex; gap:4px; }
+.bottomnav-in{ max-width:560px; margin:0 auto; display:flex; align-items:flex-end; gap:4px; }
 .nav-btn{ flex:1; background:none; border:0; padding:8px 4px; border-radius:14px; display:flex; flex-direction:column; align-items:center; gap:3px;
   color:var(--mut); font-family:inherit; cursor:pointer; transition:background .18s, color .18s, transform .12s; }
 .nav-btn .i{ width:21px; height:21px; }
 .nav-btn span{ font-size:10.5px; font-weight:600; }
 .nav-btn.on{ color:var(--brand); background:var(--brand-50); }
 .nav-btn:active{ transform:scale(.92); }
+.nav-fab{ flex:none; width:52px; height:52px; border-radius:50%; border:0; cursor:pointer; margin:0 4px;
+  background:linear-gradient(135deg,var(--brand-2),var(--brand)); color:#fff; display:grid; place-items:center;
+  margin-top:-28px; box-shadow:0 10px 22px rgba(59,91,214,.42); transition:transform .15s; }
+.nav-fab .i{ width:23px; height:23px; }
+.nav-fab:active{ transform:scale(.92); }
 
 /* settings tab */
 .set-card{ background:#fff; border:1px solid rgba(30,30,70,.05); border-radius:var(--radius-lg); padding:20px; margin-bottom:16px; box-shadow:var(--shadow-md); }
@@ -150,8 +185,11 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 
 <div class="head">
   <div class="head-row">
-    <div><h1>คอร์สของบุตรหลาน</h1>
-    <p id="headSub">การมาเรียน · ผลการเรียน · แจ้งลา</p></div>
+    <div class="head-id">
+      <div class="head-av" id="headAv">?</div>
+      <div><h1>คอร์สของบุตรหลาน</h1>
+      <p id="headSub">การมาเรียน · ผลการเรียน · แจ้งลา</p></div>
+    </div>
     <span class="head-badge">ปีการศึกษา 2569</span>
   </div>
 </div>
@@ -205,8 +243,16 @@ async function load(){
   if(res.status!=='success'){ render('<div class="notice">'+esc(res.message||'เกิดข้อผิดพลาด')+'</div>'); return; }
   STATE = res.data;
   document.getElementById('headSub').textContent = 'สวัสดีค่ะ คุณ'+(PROFILE.displayName||'');
+  setHeadAvatar();
   renderActiveTab();
   renderNav();
+}
+
+function setHeadAvatar(){
+  const el = document.getElementById('headAv');
+  if(!el) return;
+  if(PROFILE && PROFILE.pictureUrl){ el.innerHTML = '<img src="'+PROFILE.pictureUrl+'" alt="">'; }
+  else { el.textContent = initials(PROFILE ? PROFILE.displayName : '?'); }
 }
 
 function emptyState(text){
@@ -217,6 +263,7 @@ function emptyState(text){
 const NAV_ITEMS = [
   { id:'home', label:'หน้าหลัก', icon:'ic-home' },
   { id:'attendance', label:'การมาเรียน', icon:'ic-calendar' },
+  { id:'__fab__' },
   { id:'results', label:'ผลการเรียน', icon:'ic-award' },
   { id:'settings', label:'ตั้งค่า', icon:'ic-settings' }
 ];
@@ -224,7 +271,11 @@ let TAB = 'home';
 function renderNav(){
   let h = '<div class="bottomnav-in">';
   NAV_ITEMS.forEach(function(n){
-    h += '<button class="nav-btn'+(TAB===n.id?' on':'')+'" onclick="setTab(\''+n.id+'\')">'+svg(n.icon)+'<span>'+n.label+'</span></button>';
+    if(n.id==='__fab__'){
+      h += '<button class="nav-fab" onclick="quickLeave()" title="แจ้งลา">'+svg('ic-cal-x')+'</button>';
+    } else {
+      h += '<button class="nav-btn'+(TAB===n.id?' on':'')+'" onclick="setTab(\''+n.id+'\')">'+svg(n.icon)+'<span>'+n.label+'</span></button>';
+    }
   });
   h += '</div>';
   document.getElementById('bottomnav').innerHTML = h;
@@ -239,8 +290,52 @@ function renderActiveTab(){
 }
 
 const PAY = { approved:['pay-ok','อนุมัติแล้ว','ic-check'], pending_review:['pay-wait','รอตรวจสอบ','ic-clock'], rejected:['pay-no','ไม่อนุมัติ','ic-x'] };
+const STATUS_COLOR = { present:'#16a36a', late:'#e0a000', absent:'#e54848', leave:'#3b6fe0' };
+
+/* ---------- การ์ดสรุปด้านบน (รวมทุกบุตรหลาน) ---------- */
+function statsRow(){
+  let totalCourses=0, pendingKids=0, sumPresent=0, sumLate=0, sumTotal=0;
+  STATE.forEach(function(kid){
+    totalCourses += kid.courses.length;
+    if(kid.payment_status==='pending_review') pendingKids++;
+    kid.courses.forEach(function(c){
+      const s=c.summary||{};
+      sumPresent += (s.present||0); sumLate += (s.late||0); sumTotal += (s.total||0);
+    });
+  });
+  const rate = sumTotal ? Math.round((sumPresent+sumLate)/sumTotal*100) : null;
+  return '<div class="stats-row">'
+    + '<div class="stat-card"><div class="sv">'+totalCourses+'</div><div class="sl">คอร์สทั้งหมด</div></div>'
+    + '<div class="stat-card accent"><div class="sv">'+(rate!=null?rate+'%':'-')+'</div><div class="sl">อัตรามาเรียน</div></div>'
+    + '<div class="stat-card"><div class="sv">'+pendingKids+'</div><div class="sl">รอตรวจสอบ</div></div>'
+    + '</div>';
+}
+
+/* ---------- แถบสรุปการมาเรียนแบบ segmented bar ---------- */
+function attBarHtml(s){
+  const total = s.total||0;
+  if(!total) return '<div class="empty-att">ยังไม่มีบันทึกการมาเรียน</div>';
+  const pct = function(n){ return total ? (n/total*100) : 0; };
+  let bar = '<div class="attbar">';
+  ['present','late','absent','leave'].forEach(function(k){
+    if(s[k]) bar += '<i style="width:'+pct(s[k])+'%;background:'+STATUS_COLOR[k]+'"></i>';
+  });
+  bar += '</div>';
+  const legend = '<div class="attbar-legend">'
+    + ['present','late','absent','leave'].map(function(k){
+        return '<span><i style="background:'+STATUS_COLOR[k]+'"></i>'+ST_TH[k]+' '+(s[k]||0)+'</span>';
+      }).join('')
+    + '</div>';
+  const rate = Math.round(pct((s.present||0)+(s.late||0)));
+  let note, cls;
+  if(rate>=90){ note='เข้าเรียนสม่ำเสมอ'; cls=''; }
+  else if(rate>=75){ note='ควรติดตามเล็กน้อย'; cls='warn'; }
+  else { note='ควรติดตามใกล้ชิด'; cls='danger'; }
+  return bar + legend + '<div class="attnote '+cls+'">'+svg('ic-check')+note+' ('+rate+'%)</div>';
+}
+
 function renderHome(){
-  let h = '';
+  let h = STATE.length ? statsRow() : '';
   STATE.forEach(function(kid){
     const pay = PAY[kid.payment_status] || PAY.pending_review;
     h += '<div class="kid"><div class="kid-top">'
@@ -260,26 +355,45 @@ function renderHome(){
           + (tm?'<span>'+svg('ic-clock')+esc(tm)+' น.</span>':'')
         + '</div></div>'
         + '<button class="btn-leave" onclick="openLeave(\''+kid.enrollment_id+'\',\''+c.course_id+'\',\''+esc(c.name)+'\')">'+svg('ic-cal-x')+'แจ้งลา</button>'
+        + '</div>'
+        + attBarHtml(s)
         + '</div>';
-
-      if(s.total){
-        h += '<div class="att-pills">'
-          + pill('present', s.present) + pill('late', s.late) + pill('absent', s.absent) + pill('leave', s.leave)
-          + '</div>';
-      } else {
-        h += '<div class="empty-att">ยังไม่มีบันทึกการมาเรียน</div>';
-      }
-      h += '</div>';
     });
     h += '</div>';
   });
   if(!h){ h = emptyState('ยังไม่มีคอร์สที่ติดตามได้'); }
   render(h);
 }
-const PILL_ICON = { present:'ic-check', late:'ic-clock', absent:'ic-x', leave:'ic-calendar' };
-function pill(cls, n){
-  return '<div class="pill '+cls+'"><svg class="i pi"><use href="#'+PILL_ICON[cls]+'"></use></svg>'
-    + '<div class="n">'+(n||0)+'</div><div class="l">'+ST_TH[cls]+'</div></div>';
+
+/* ---------- โดนัทชาร์ตการมาเรียน ---------- */
+function donutChart(s, size, sw){
+  size = size || 110; sw = sw || 14;
+  const r=(size-sw)/2, c=size/2, circ=2*Math.PI*r;
+  const total = s.total||0;
+  let off=0, circles='';
+  ['present','late','absent','leave'].forEach(function(k){
+    const v = s[k]||0; if(!v || !total) return;
+    const frac=v/total, dash=frac*circ, gap=circ-dash;
+    circles += '<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+STATUS_COLOR[k]+'" stroke-width="'+sw+'" '
+      + 'stroke-dasharray="'+dash.toFixed(2)+' '+gap.toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" '
+      + 'stroke-linecap="round" transform="rotate(-90 '+c+' '+c+')"></circle>';
+    off += dash;
+  });
+  return '<svg viewBox="0 0 '+size+' '+size+'" width="'+size+'" height="'+size+'">'
+    + '<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="#eef0f7" stroke-width="'+sw+'"></circle>'
+    + circles + '</svg>';
+}
+function catList(s){
+  const total = s.total||0;
+  let h='';
+  ['present','late','absent','leave'].forEach(function(k){
+    const v = s[k]||0;
+    const pct = total ? Math.round(v/total*100) : 0;
+    h += '<div class="cat-item"><div class="ch"><span>'+ST_TH[k]+'</span><span class="pct">'+pct+'%</span></div>'
+       + '<div class="cbar"><i style="width:'+pct+'%;background:'+STATUS_COLOR[k]+'"></i></div>'
+       + '<div class="csub">'+v+' ครั้ง จาก '+total+' ครั้ง</div></div>';
+  });
+  return h;
 }
 
 /* ---------- แท็บ: การมาเรียน ---------- */
@@ -293,10 +407,12 @@ function renderAttendanceTab(){
         + '<div><div class="kid-nm">'+esc(kid.student_name)+'</div>'
         + '<div class="kid-meta">'+esc(c.name)+'</div></div></div>';
       if(s.total){
-        h += '<div class="att-pills">'
-          + pill('present', s.present) + pill('late', s.late) + pill('absent', s.absent) + pill('leave', s.leave)
+        h += '<div class="donut-card">'
+          + '<div class="donut-wrap">'+donutChart(s)+'<div class="donut-center"><b>'+s.total+'</b><small>ครั้งเรียน</small></div></div>'
+          + '<div class="cat-list">'+catList(s)+'</div>'
           + '</div>';
-        h += '<div class="rec-list" style="margin-top:10px">';
+        h += '<div class="group-label">ประวัติการเช็คชื่อ</div>';
+        h += '<div class="rec-list">';
         (c.records||[]).forEach(function(r){
           h += '<div class="rec-item"><span>'+thaiDate(r.date)+(r.note?' · '+esc(r.note):'')+'</span>'
             + '<span class="rec-st '+r.status+'">'+esc(r.status_th)+'</span></div>';
@@ -364,6 +480,27 @@ async function doUnlink(){
     if(res.status==='success'){ toast(res.message); setTimeout(function(){ location.reload(); }, 1200); }
     else { toast(res.message || 'ไม่สำเร็จ'); }
   }catch(e){ closeSheet(); toast('เกิดข้อผิดพลาด'); }
+}
+
+/* ---------- ปุ่มลอย: แจ้งลาด่วน (เลือกคอร์สก่อนถ้ามีมากกว่า 1) ---------- */
+function quickLeave(){
+  const opts = [];
+  STATE.forEach(function(kid){
+    kid.courses.forEach(function(c){
+      opts.push({ enrollId: kid.enrollment_id, courseId: c.course_id, label: kid.student_name+' · '+c.name });
+    });
+  });
+  if(!opts.length){ toast('ยังไม่มีคอร์สให้แจ้งลา'); return; }
+  if(opts.length===1){ openLeave(opts[0].enrollId, opts[0].courseId, opts[0].label); return; }
+
+  let h = '<h3>แจ้งลา</h3><p class="sub">เลือกคอร์สที่ต้องการแจ้งลา</p><div class="pick-list">';
+  opts.forEach(function(o){
+    h += '<button class="pick-item" onclick="closeSheet();openLeave(\''+o.enrollId+'\',\''+o.courseId+'\',\''+esc(o.label)+'\')">'
+      + esc(o.label) + svg('ic-chev') + '</button>';
+  });
+  h += '</div><button class="btn btn-ghost" onclick="closeSheet()">ยกเลิก</button>';
+  document.getElementById('sheet').innerHTML = h;
+  document.getElementById('overlay').classList.add('show');
 }
 
 /* ---------- แจ้งลา ---------- */
