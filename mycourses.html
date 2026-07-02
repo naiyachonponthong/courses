@@ -235,15 +235,42 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 .ltype-btn{ border:1.5px solid var(--line); background:#fff; border-radius:11px; padding:10px 6px; font-size:12.5px; cursor:pointer;
   color:var(--soft); font-weight:600; font-family:inherit; text-align:center; }
 .ltype-btn.on{ background:var(--brand); border-color:var(--brand); color:#fff; }
-.lv-item{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-sm); padding:13px 15px; margin-bottom:10px; }
+.lv-item{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-sm); padding:13px 15px; margin-bottom:10px; cursor:pointer; }
+.lv-item:active{ background:var(--bg); }
 .lv-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
 .lv-type{ font-weight:700; font-size:14px; }
 .lv-badge{ font-size:11px; font-weight:700; padding:4px 11px; border-radius:999px; white-space:nowrap; flex:none; }
 .lv-badge.pending{ background:var(--gold-50); color:var(--gold); }
 .lv-badge.approved{ background:var(--green-50); color:var(--green); }
 .lv-badge.rejected{ background:var(--red-50); color:var(--red); }
+.lv-badge.waiting{ background:var(--line); color:var(--mut); }
 .lv-meta{ font-size:12px; color:var(--soft); margin-top:5px; }
 .lv-reason{ font-size:12.5px; margin-top:6px; color:var(--ink); }
+
+/* teacher: รายละเอียดใบลา + สายการอนุมัติ */
+.detail-card{ background:#fff; border:1px solid rgba(30,30,70,.05); border-radius:var(--radius-lg); padding:18px; margin-bottom:14px; box-shadow:var(--shadow-md); }
+.detail-row{ margin-bottom:12px; }
+.detail-row:last-child{ margin-bottom:0; }
+.detail-row label{ display:block; font-size:11.5px; font-weight:700; color:var(--soft); margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
+.detail-row .v{ font-size:14px; }
+.tl-wrap{ padding:2px 0; }
+.tl-item{ display:flex; gap:12px; padding-bottom:16px; }
+.tl-item:last-child{ padding-bottom:0; }
+.tl-left{ display:flex; flex-direction:column; align-items:center; width:30px; flex-shrink:0; }
+.tl-dot{ width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid; flex-shrink:0; }
+.tl-dot .i{ width:13px; height:13px; }
+.tl-line{ width:2px; flex:1; min-height:14px; margin-top:4px; border-radius:2px; background:var(--line); }
+.tl-body{ flex:1; padding-top:2px; }
+.tl-step{ font-size:11px; font-weight:700; color:var(--soft); letter-spacing:.3px; margin-bottom:2px; }
+.tl-role{ font-size:14px; font-weight:600; }
+.tl-when{ font-size:12px; color:var(--soft); margin-top:4px; }
+.tl-comment{ font-size:12.5px; background:var(--bg); border-radius:9px; padding:8px 10px; margin-top:7px; border:1px solid var(--line); }
+.tl-approved .tl-dot{ background:var(--green-50); color:var(--green); border-color:var(--green); }
+.tl-approved .tl-line{ background:var(--green); }
+.tl-pending .tl-dot{ background:var(--gold-50); color:var(--gold); border-color:var(--gold); }
+.tl-rejected .tl-dot{ background:var(--red-50); color:var(--red); border-color:var(--red); }
+.tl-rejected .tl-line{ background:var(--red); }
+.tl-waiting .tl-dot{ background:var(--line); color:var(--mut); border-color:var(--line); }
 </style>
 </head>
 <body>
@@ -294,7 +321,7 @@ let TCUR = { courseId:'', date:'', records:[] };
 let TEACHER_LEAVES = [], tLeavePendingPhoto = null;
 const ST_TH = { present:'มา', late:'สาย', absent:'ขาด', leave:'ลา' };
 const LEAVE_TYPES_T = { sick:'ลาป่วย', personal:'ลากิจ', vacation:'ลาพักผ่อน', official:'ไปราชการ', maternity:'ลาคลอด', other:'อื่นๆ' };
-const LEAVE_STATUS_TH = { pending:'รออนุมัติ', approved:'อนุมัติแล้ว', rejected:'ไม่อนุมัติ' };
+const LEAVE_STATUS_TH = { pending:'รออนุมัติ', approved:'อนุมัติแล้ว', rejected:'ไม่อนุมัติ', waiting:'รอชั้นก่อน' };
 
 function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function initials(n){ return (n||'?').trim().charAt(0); }
@@ -837,13 +864,63 @@ function teacherLeaveItem(l){
     const cur = l.approvals.find(function(a){ return a.status==='pending'; });
     if(cur) curLevel = ' · รอ'+esc(cur.role_label||'');
   }
-  return '<div class="lv-item"><div class="lv-top">'
+  return '<div class="lv-item" onclick="openTeacherLeaveDetail(\''+l.id+'\')"><div class="lv-top">'
     + '<span class="lv-type">'+(LEAVE_TYPES_T[l.leave_type]||l.leave_type)+'</span>'
     + '<span class="lv-badge '+st+'">'+(LEAVE_STATUS_TH[st]||st)+'</span></div>'
     + '<div class="lv-meta">'+thaiDate(l.date_from)+(l.date_to&&l.date_to!==l.date_from?' – '+thaiDate(l.date_to):'')+' · '+(l.days||1)+' วัน'+curLevel+'</div>'
     + (l.reason?'<div class="lv-reason">'+esc(l.reason)+'</div>':'')
     + '</div>';
 }
+
+/* ---------- ครู: รายละเอียดใบลา + สายการอนุมัติ ---------- */
+function openTeacherLeaveDetail(id){
+  const l = TEACHER_LEAVES.find(function(x){ return x.id===id; });
+  if(!l) return;
+  renderTeacherLeaveDetail(l);
+}
+function renderTeacherLeaveDetail(l){
+  const st = l.status || 'pending';
+  let h = '<div class="link-back" onclick="renderTeacherLeaveHistoryTab()">'+svg('ic-arrow-left')+'ใบลาของฉัน</div>';
+  h += '<div class="detail-card">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px">'
+      + '<div style="font-weight:700;font-size:16px">'+(LEAVE_TYPES_T[l.leave_type]||l.leave_type)+'</div>'
+      + '<span class="lv-badge '+st+'">'+(LEAVE_STATUS_TH[st]||st)+'</span>'
+    + '</div>'
+    + '<div class="detail-row"><label>วันที่ลา</label><div class="v">'
+      + thaiDate(l.date_from)+(l.date_to&&l.date_to!==l.date_from?' – '+thaiDate(l.date_to):'')+' ('+(l.days||1)+' วัน)</div></div>'
+    + (l.reason?'<div class="detail-row"><label>เหตุผล</label><div class="v">'+esc(l.reason)+'</div></div>':'')
+    + '</div>';
+  if(l.approvals && l.approvals.length){
+    h += '<div class="detail-card"><div class="group-label" style="margin-top:0">สายการอนุมัติ</div>'+buildApprovalTimeline(l.approvals)+'</div>';
+  }
+  render(h);
+  window.scrollTo(0,0);
+}
+function buildApprovalTimeline(approvals){
+  const TL = {
+    approved: { cls:'tl-approved', icon:'ic-check' },
+    rejected: { cls:'tl-rejected', icon:'ic-x' },
+    pending:  { cls:'tl-pending',  icon:'ic-clock' },
+    waiting:  { cls:'tl-waiting',  icon:'' }
+  };
+  let h = '<div class="tl-wrap">';
+  approvals.forEach(function(a, i){
+    const tl = TL[a.status] || TL.waiting;
+    const isLast = i === approvals.length-1;
+    const actedDate = a.acted_at ? String(a.acted_at).split('T')[0] : '';
+    h += '<div class="tl-item '+tl.cls+'">'
+      + '<div class="tl-left"><div class="tl-dot">'+(tl.icon?svg(tl.icon):'')+'</div>'+(!isLast?'<div class="tl-line"></div>':'')+'</div>'
+      + '<div class="tl-body">'
+        + '<div class="tl-step">ชั้น '+a.level+' · '+esc(a.role_label||a.role)+'</div>'
+        + '<div class="tl-role">'+esc(a.approver_name||'(ไม่ระบุ)')+'</div>'
+        + '<span class="lv-badge '+a.status+'" style="margin-top:4px;display:inline-block">'+(LEAVE_STATUS_TH[a.status]||a.status)+'</span>'
+        + (actedDate?'<div class="tl-when">'+thaiDate(actedDate)+'</div>':'')
+        + (a.comment?'<div class="tl-comment">'+esc(a.comment)+'</div>':'')
+      + '</div></div>';
+  });
+  return h + '</div>';
+}
+
 async function submitTeacherLeave(){
   const typeEl = document.querySelector('.ltype-btn.on');
   const payload = {
