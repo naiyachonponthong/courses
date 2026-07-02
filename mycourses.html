@@ -402,7 +402,31 @@ function renderParentChoice(){
   render('<div class="link-back" onclick="renderChoicePage()">'+svg('ic-arrow-left')+'ย้อนกลับ</div>'
     + '<div class="notice"><div class="ic">'+svg('ic-inbox')+'</div><b>ยังไม่พบใบสมัครคอร์ส</b>'
     + 'เมื่อสมัครคอร์สผ่านบัญชี LINE นี้ ข้อมูลการมาเรียนและผลการเรียนจะแสดงที่นี่'
-    + '<a class="btn btn-primary" style="text-decoration:none;margin-top:16px" href="enroll.html">สมัครคอร์สเรียน</a></div>');
+    + '<a class="btn btn-primary" style="text-decoration:none;margin-top:16px" href="enroll.html">สมัครคอร์สเรียน</a>'
+    + '<button class="btn btn-ghost" onclick="renderParentLinkForm()">เคยสมัครไว้แล้ว? เชื่อมบัญชี</button>'
+    + '</div>');
+}
+function renderParentLinkForm(){
+  render('<div class="link-back" onclick="renderParentChoice()">'+svg('ic-arrow-left')+'ย้อนกลับ</div>'
+    + '<div class="kid">'
+    + '<div style="font-weight:700;font-size:15px;margin-bottom:4px">เชื่อมบัญชีผู้ปกครอง</div>'
+    + '<div style="font-size:12.5px;color:var(--soft);margin-bottom:16px">กรอกเลขที่ใบสมัคร (เช่น EN-690630-4821 ที่ได้รับตอนสมัคร) และเบอร์โทรที่ใช้ตอนสมัคร</div>'
+    + '<div class="field"><label>เลขที่ใบสมัคร</label><input class="ctl" id="pcRef" placeholder="EN-XXXXXX-XXXX" autocomplete="off"></div>'
+    + '<div class="field"><label>เบอร์โทร</label><input class="ctl" id="pcPhone" type="tel" placeholder="08XXXXXXXX" autocomplete="off"></div>'
+    + '<button class="btn btn-primary" id="btnPLink">'+svg('ic-user-check')+' เชื่อมต่อ</button>'
+    + '</div>');
+  document.getElementById('btnPLink').onclick = doParentLink;
+}
+async function doParentLink(){
+  const ref = document.getElementById('pcRef').value.trim();
+  const phone = document.getElementById('pcPhone').value.trim();
+  if(!ref || !phone){ toast('กรุณากรอกให้ครบ'); return; }
+  const btn = document.getElementById('btnPLink'); btn.disabled = true; btn.textContent = 'กำลังเชื่อมต่อ...';
+  try{
+    const res = await api('linkParentEnrollmentLiff', { line_user_id: PROFILE.userId, ref: ref, phone: phone });
+    if(res.status==='success'){ toast('เชื่อมต่อสำเร็จ'); load(); }
+    else { toast(res.message||'ไม่สำเร็จ'); btn.disabled=false; btn.innerHTML=svg('ic-user-check')+' เชื่อมต่อ'; }
+  }catch(e){ toast('เกิดข้อผิดพลาด'); btn.disabled=false; btn.innerHTML=svg('ic-user-check')+' เชื่อมต่อ'; }
 }
 function renderTeacherLinkForm(){
   render('<div class="link-back" onclick="renderChoicePage()">'+svg('ic-arrow-left')+'ย้อนกลับ</div>'
