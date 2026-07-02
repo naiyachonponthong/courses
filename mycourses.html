@@ -418,7 +418,8 @@ const NAV_ITEMS = [
 ];
 const TEACHER_NAV_ITEMS = [
   { id:'thome', label:'เช็คชื่อ', icon:'ic-user-check' },
-  { id:'tleave', label:'ลา', icon:'ic-cal-x' },
+  { id:'tleave', label:'ยื่นใบลา', icon:'ic-cal-x' },
+  { id:'thistory', label:'ใบลาของฉัน', icon:'ic-inbox' },
   { id:'tsettings', label:'ตั้งค่า', icon:'ic-settings' }
 ];
 let TAB = 'home';
@@ -441,7 +442,8 @@ function setTab(t){ TAB = t; renderActiveTab(); renderNav(); window.scrollTo(0,0
 function renderActiveTab(){
   if(ROLE==='teacher'){
     if(TAB==='tsettings') renderTeacherSettingsTab();
-    else if(TAB==='tleave') renderTeacherLeaveTab();
+    else if(TAB==='tleave') renderTeacherLeaveFormTab();
+    else if(TAB==='thistory') renderTeacherLeaveHistoryTab();
     else renderTeacherHome();
     return;
   }
@@ -788,19 +790,15 @@ async function saveTeacherAttendance(){
 }
 
 /* ---------- ครู: ยื่นใบลาของตัวเอง ---------- */
-async function renderTeacherLeaveTab(){
-  render('<div class="loading"><div class="spin"></div>กำลังโหลด...</div>');
-  const res = await api('teacherLiffInit', { line_user_id: PROFILE.userId });
-  TEACHER_LEAVES = (res.status==='success') ? res.leaves : [];
+function renderTeacherLeaveFormTab(){
   tLeavePendingPhoto = null;
-
   let typeChips = '<div class="ltype-grid">';
   Object.keys(LEAVE_TYPES_T).forEach(function(k, i){
     typeChips += '<button type="button" class="ltype-btn'+(i===0?' on':'')+'" data-v="'+k+'" onclick="pickTLtype(this)">'+LEAVE_TYPES_T[k]+'</button>';
   });
   typeChips += '</div>';
 
-  let h = '<div class="kid">'
+  const h = '<div class="kid">'
     + '<div style="font-weight:700;font-size:15.5px;margin-bottom:12px">ยื่นใบลา</div>'
     + '<div class="field"><label>ประเภทการลา</label>'+typeChips+'</div>'
     + '<div class="field"><label>ตั้งแต่วันที่</label><input type="date" class="ctl" id="tlFrom" value="'+today()+'"></div>'
@@ -810,10 +808,6 @@ async function renderTeacherLeaveTab(){
     + '<button class="btn btn-primary" id="btnTLeaveSubmit">'+svg('ic-check')+' ส่งใบลา</button>'
     + '</div>';
 
-  h += '<div class="group-label">ใบลาของฉัน</div>';
-  if(!TEACHER_LEAVES.length) h += emptyState('ยังไม่มีประวัติการลา');
-  else TEACHER_LEAVES.forEach(function(l){ h += teacherLeaveItem(l); });
-
   render(h);
   document.getElementById('tlPhoto').onchange = function(){
     const f = this.files[0]; if(!f) return;
@@ -821,6 +815,16 @@ async function renderTeacherLeaveTab(){
     const r = new FileReader(); r.onload = function(e){ tLeavePendingPhoto = e.target.result; }; r.readAsDataURL(f);
   };
   document.getElementById('btnTLeaveSubmit').onclick = submitTeacherLeave;
+}
+async function renderTeacherLeaveHistoryTab(){
+  render('<div class="loading"><div class="spin"></div>กำลังโหลด...</div>');
+  const res = await api('teacherLiffInit', { line_user_id: PROFILE.userId });
+  TEACHER_LEAVES = (res.status==='success') ? res.leaves : [];
+
+  let h = '<div class="group-label">ใบลาของฉัน</div>';
+  if(!TEACHER_LEAVES.length) h += emptyState('ยังไม่มีประวัติการลา');
+  else TEACHER_LEAVES.forEach(function(l){ h += teacherLeaveItem(l); });
+  render(h);
 }
 function pickTLtype(btn){
   document.querySelectorAll('.ltype-btn').forEach(function(b){ b.classList.remove('on'); });
@@ -857,7 +861,7 @@ async function submitTeacherLeave(){
     if(res.status==='success'){
       toast(res.message);
       if(liff.isInClient()){ try{ await liff.sendMessages([{type:'text', text:'ยื่นใบลาเรียบร้อยแล้ว รอการอนุมัติ'}]); }catch(e){} }
-      renderTeacherLeaveTab();
+      setTab('thistory');
     } else { toast(res.message||'ส่งไม่สำเร็จ'); btn.disabled=false; btn.innerHTML=svg('ic-check')+' ส่งใบลา'; }
   }catch(e){ toast('เกิดข้อผิดพลาด'); btn.disabled=false; btn.innerHTML=svg('ic-check')+' ส่งใบลา'; }
 }
