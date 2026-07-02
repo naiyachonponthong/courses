@@ -584,7 +584,7 @@ async function doUnlink(){
   const btn = document.getElementById('cfYes');
   if(btn){ btn.disabled = true; btn.textContent = 'กำลังดำเนินการ...'; }
   try{
-    const res = await api('unlinkParentLiff', { line_user_id: PROFILE.userId });
+    const res = await api('unlinkCourseParentLiff', { line_user_id: PROFILE.userId });
     closeSheet();
     if(res.status==='success'){ toast(res.message); setTimeout(function(){ location.reload(); }, 1200); }
     else { toast(res.message || 'ไม่สำเร็จ'); }
