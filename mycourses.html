@@ -174,6 +174,39 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 .section-title{ font-size:12.5px; font-weight:700; color:var(--soft); margin:0 0 10px; text-transform:uppercase; letter-spacing:.4px; }
 .btn-danger{ background:var(--red-50); color:var(--red); }
 .btn-danger:active{ transform:scale(.98); }
+
+/* role choice / teacher link */
+.choice-card{ background:#fff; border:1.5px solid var(--line); border-radius:var(--radius-lg); padding:20px 18px; margin-bottom:12px;
+  display:flex; align-items:center; gap:16px; cursor:pointer; box-shadow:var(--shadow-sm); transition:box-shadow .15s, border-color .15s; }
+.choice-card:active{ border-color:var(--brand); box-shadow:0 0 0 4px var(--brand-50); }
+.choice-ic{ width:52px; height:52px; border-radius:16px; display:grid; place-items:center; flex:none; }
+.choice-ic .i{ width:24px; height:24px; }
+.choice-ic.parent{ background:var(--green-50); color:var(--green); }
+.choice-ic.teacher{ background:var(--brand-50); color:var(--brand); }
+.choice-title{ font-weight:700; font-size:15.5px; }
+.choice-sub{ font-size:12.5px; color:var(--soft); margin-top:2px; }
+.link-back{ display:flex; align-items:center; gap:8px; color:var(--soft); font-size:13.5px; cursor:pointer; margin-bottom:16px; font-weight:600; }
+.link-back .i{ width:16px; height:16px; }
+
+/* teacher: course list */
+.tc-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-sm); padding:15px; margin-bottom:10px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; box-shadow:var(--shadow-sm); }
+.tc-nm{ font-weight:700; font-size:14.5px; }
+.tc-meta{ font-size:11.5px; color:var(--soft); margin-top:4px; display:flex; gap:7px; flex-wrap:wrap; }
+.tc-meta span{ display:inline-flex; align-items:center; gap:4px; }
+.tc-meta .i{ width:12px; height:12px; }
+.tc-card .i.chev{ width:14px; height:14px; color:var(--mut); flex:none; transform:rotate(-90deg); }
+
+/* teacher: attendance taking */
+.trow{ background:#fff; border:1px solid var(--line); border-radius:13px; padding:12px 13px; margin-bottom:8px; }
+.trow-nm{ font-weight:600; font-size:14px; margin-bottom:9px; }
+.tseg{ display:flex; gap:6px; }
+.tseg button{ flex:1; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:8px 4px; font-size:12px; font-weight:700; color:var(--soft); cursor:pointer; font-family:inherit; }
+.tseg button.on.present{ background:var(--green-50); border-color:var(--green); color:var(--green); }
+.tseg button.on.late{ background:var(--gold-50); border-color:var(--gold); color:var(--gold); }
+.tseg button.on.absent{ background:var(--red-50); border-color:var(--red); color:var(--red); }
+.tseg button.on.leave{ background:var(--blue-50); border-color:var(--blue); color:var(--blue); }
+.saved-note{ font-size:11.5px; color:var(--soft); margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -190,13 +223,17 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
   <symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 4.29l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
   <symbol id="ic-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
   <symbol id="ic-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="ic-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="ic-grad" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"/></symbol>
+  <symbol id="ic-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="ic-user-check" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 11 2 2 4-4"/></symbol>
 </svg>
 
 <div class="head">
   <div class="head-row">
     <div class="head-id">
       <div class="head-av" id="headAv">?</div>
-      <div><h1>คอร์สของบุตรหลาน</h1>
+      <div><h1 id="pageTitle">คอร์สของบุตรหลาน</h1>
       <p id="headSub">การมาเรียน · ผลการเรียน · แจ้งลา</p></div>
     </div>
     <span class="head-badge">ปีการศึกษา 2569</span>
@@ -215,6 +252,8 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 <script src="config.js"></script>
 <script>
 let PROFILE = null, STATE = [];
+let ROLE = '', TEACHER = null, TEACHER_COURSES = [];
+let TCUR = { courseId:'', date:'', records:[] };
 const ST_TH = { present:'มา', late:'สาย', absent:'ขาด', leave:'ลา' };
 
 function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -243,18 +282,68 @@ async function boot(){
 
 async function load(){
   const res = await api('parentCourseInit', { line_user_id: PROFILE.userId });
-  if(res.status==='empty'){
-    render('<div class="notice"><div class="ic">'+svg('ic-inbox')+'</div><b>ยังไม่พบใบสมัครคอร์ส</b>'
-      + 'เมื่อสมัครคอร์สผ่านบัญชี LINE นี้ ข้อมูลการมาเรียนและผลการเรียนจะแสดงที่นี่'
-      + '<a class="btn btn-primary" style="text-decoration:none;margin-top:16px" href="enroll.html">สมัครคอร์สเรียน</a></div>');
+  if(res.status==='success'){
+    ROLE = 'parent'; STATE = res.data;
+    document.getElementById('pageTitle').textContent = 'คอร์สของบุตรหลาน';
+    document.getElementById('headSub').textContent = 'สวัสดีค่ะ คุณ'+(PROFILE.displayName||'');
+    setHeadAvatar();
+    renderActiveTab();
+    renderNav();
     return;
   }
-  if(res.status!=='success'){ render('<div class="notice">'+esc(res.message||'เกิดข้อผิดพลาด')+'</div>'); return; }
-  STATE = res.data;
-  document.getElementById('headSub').textContent = 'สวัสดีค่ะ คุณ'+(PROFILE.displayName||'');
-  setHeadAvatar();
-  renderActiveTab();
-  renderNav();
+  const tRes = await api('courseTeacherLiffInit', { line_user_id: PROFILE.userId });
+  if(tRes.status==='success'){
+    ROLE = 'teacher'; TEACHER = tRes.user; TEACHER_COURSES = tRes.courses||[];
+    document.getElementById('pageTitle').textContent = 'เช็คชื่อคอร์สเรียน';
+    document.getElementById('headSub').textContent = 'สวัสดีคุณครู '+(TEACHER.name||'');
+    setHeadAvatar();
+    TAB = 'thome';
+    renderActiveTab();
+    renderNav();
+    return;
+  }
+  renderChoicePage();
+}
+
+/* ---------- หน้าเลือกบทบาท (ครั้งแรกที่ยังไม่เชื่อมบัญชี) ---------- */
+function renderChoicePage(){
+  document.getElementById('pageTitle').textContent = 'ระบบคอร์สเรียน';
+  document.getElementById('headSub').textContent = 'เชื่อมต่อบัญชี LINE';
+  render('<div style="text-align:center;margin-bottom:18px;color:var(--soft);font-size:13.5px">ท่านเป็น...</div>'
+    + '<div class="choice-card" onclick="renderParentChoice()">'
+      + '<div class="choice-ic parent">'+svg('ic-users')+'</div>'
+      + '<div><div class="choice-title">ผู้ปกครอง</div><div class="choice-sub">ติดตามการมาเรียน / ผลการเรียน / แจ้งลา</div></div>'
+    + '</div>'
+    + '<div class="choice-card" onclick="renderTeacherLinkForm()">'
+      + '<div class="choice-ic teacher">'+svg('ic-grad')+'</div>'
+      + '<div><div class="choice-title">ครู / บุคลากร</div><div class="choice-sub">เช็คชื่อนักเรียนในคอร์สที่สอน</div></div>'
+    + '</div>');
+}
+function renderParentChoice(){
+  render('<div class="link-back" onclick="renderChoicePage()">'+svg('ic-arrow-left')+'ย้อนกลับ</div>'
+    + '<div class="notice"><div class="ic">'+svg('ic-inbox')+'</div><b>ยังไม่พบใบสมัครคอร์ส</b>'
+    + 'เมื่อสมัครคอร์สผ่านบัญชี LINE นี้ ข้อมูลการมาเรียนและผลการเรียนจะแสดงที่นี่'
+    + '<a class="btn btn-primary" style="text-decoration:none;margin-top:16px" href="enroll.html">สมัครคอร์สเรียน</a></div>');
+}
+function renderTeacherLinkForm(){
+  render('<div class="link-back" onclick="renderChoicePage()">'+svg('ic-arrow-left')+'ย้อนกลับ</div>'
+    + '<div class="kid">'
+    + '<div style="font-weight:700;font-size:15px;margin-bottom:4px">เชื่อมบัญชีครู</div>'
+    + '<div style="font-size:12.5px;color:var(--soft);margin-bottom:16px">กรอก Username ที่ได้รับจากผู้ดูแลระบบ (บัญชีเดียวกับที่ใช้ล็อกอินหลังบ้าน)</div>'
+    + '<div class="field"><label>Username</label><input class="ctl" id="tcUser" placeholder="เช่น teacher01" autocomplete="off"></div>'
+    + '<button class="btn btn-primary" id="btnTLink">'+svg('ic-user-check')+' เชื่อมต่อ</button>'
+    + '</div>');
+  document.getElementById('btnTLink').onclick = doTeacherLink;
+}
+async function doTeacherLink(){
+  const code = document.getElementById('tcUser').value.trim();
+  if(!code){ toast('กรุณากรอก Username'); return; }
+  const btn = document.getElementById('btnTLink'); btn.disabled = true; btn.textContent = 'กำลังเชื่อมต่อ...';
+  try{
+    const res = await api('linkTeacherLine', { line_user_id: PROFILE.userId, teacher_code: code });
+    if(res.status==='success'){ toast('เชื่อมต่อสำเร็จ'); load(); }
+    else { toast(res.message||'ไม่สำเร็จ'); btn.disabled=false; btn.innerHTML=svg('ic-user-check')+' เชื่อมต่อ'; }
+  }catch(e){ toast('เกิดข้อผิดพลาด'); btn.disabled=false; btn.innerHTML=svg('ic-user-check')+' เชื่อมต่อ'; }
 }
 
 function setHeadAvatar(){
@@ -276,10 +365,15 @@ const NAV_ITEMS = [
   { id:'results', label:'ผลการเรียน', icon:'ic-award' },
   { id:'settings', label:'ตั้งค่า', icon:'ic-settings' }
 ];
+const TEACHER_NAV_ITEMS = [
+  { id:'thome', label:'เช็คชื่อ', icon:'ic-user-check' },
+  { id:'tsettings', label:'ตั้งค่า', icon:'ic-settings' }
+];
 let TAB = 'home';
 function renderNav(){
+  const items = ROLE==='teacher' ? TEACHER_NAV_ITEMS : NAV_ITEMS;
   let h = '<div class="bottomnav-in">';
-  NAV_ITEMS.forEach(function(n){
+  items.forEach(function(n){
     if(n.id==='__fab__'){
       h += '<div class="nav-fab-wrap"><button class="nav-fab" onclick="quickLeave()" title="แจ้งลา">'+svg('ic-cal-x')+'</button>'
         + '<span class="nav-fab-label">แจ้งลา</span></div>';
@@ -293,6 +387,11 @@ function renderNav(){
 }
 function setTab(t){ TAB = t; renderActiveTab(); renderNav(); window.scrollTo(0,0); }
 function renderActiveTab(){
+  if(ROLE==='teacher'){
+    if(TAB==='tsettings') renderTeacherSettingsTab();
+    else renderTeacherHome();
+    return;
+  }
   if(TAB==='attendance') renderAttendanceTab();
   else if(TAB==='results') renderResultsTab();
   else if(TAB==='settings') renderSettingsTab();
@@ -550,6 +649,113 @@ async function submitLeave(enrollId, courseId){
       load();
     } else { toast(res.message||'ส่งไม่สำเร็จ'); btn.disabled=false; btn.textContent='ยืนยันแจ้งลา'; }
   }catch(e){ toast('เกิดข้อผิดพลาด'); btn.disabled=false; btn.textContent='ยืนยันแจ้งลา'; }
+}
+
+/* ══════════════════════════════════════════════════
+   ครู — เช็คชื่อคอร์สผ่าน LINE
+   ══════════════════════════════════════════════════ */
+function renderTeacherHome(){
+  if(!TEACHER_COURSES.length){
+    render(emptyState('ยังไม่มีคอร์สที่คุณครูเช็คชื่อได้'));
+    return;
+  }
+  let h = '<div class="group-label">คอร์สที่เช็คชื่อได้</div>';
+  TEACHER_COURSES.forEach(function(c){
+    const tm = (c.time_start||'') + (c.time_end?('–'+c.time_end):'');
+    h += '<div class="tc-card" onclick="openTeacherCourse(\''+c.id+'\')">'
+      + '<div><div class="tc-nm">'+esc(c.name)+'</div>'
+      + '<div class="tc-meta">'
+        + (c.days?'<span>'+svg('ic-calendar')+esc(c.days)+'</span>':'')
+        + (tm?'<span>'+svg('ic-clock')+esc(tm)+' น.</span>':'')
+      + '</div></div>'
+      + svg('ic-chev').replace('class="i"','class="i chev"')
+      + '</div>';
+  });
+  render(h);
+}
+
+async function openTeacherCourse(courseId){
+  TCUR.courseId = courseId; TCUR.date = TCUR.date || today();
+  render('<div class="loading"><div class="spin"></div>กำลังโหลดรายชื่อ...</div>');
+  await fetchTeacherAttendance();
+}
+
+async function fetchTeacherAttendance(){
+  const res = await api('getCourseAttendanceLiff', { line_user_id: PROFILE.userId, course_id: TCUR.courseId, date: TCUR.date });
+  if(res.status!=='success'){ render('<div class="notice">'+esc(res.message||'เกิดข้อผิดพลาด')+'</div>'); return; }
+  TCUR.records = res.records;
+  renderTeacherAttendance(res);
+}
+
+function renderTeacherAttendance(res){
+  let h = '<div class="link-back" onclick="TCUR.courseId=\'\';renderTeacherHome()">'+svg('ic-arrow-left')+'รายชื่อคอร์ส</div>';
+  h += '<div class="kid" style="margin-bottom:12px">'
+    + '<div style="font-weight:700;font-size:15.5px;margin-bottom:10px">'+esc(res.course_name)+'</div>'
+    + '<div class="field" style="margin-bottom:0"><label>วันที่เช็คชื่อ</label><input type="date" class="ctl" id="tDate" value="'+TCUR.date+'"></div>'
+    + '</div>';
+  if(res.saved) h += '<div class="saved-note">'+svg('ic-check')+' บันทึกแล้ว โดย '+esc(res.saved_by||'')+' (แก้ไขแล้วบันทึกซ้ำได้)</div>';
+  if(!res.records.length){
+    h += emptyState('ยังไม่มีนักเรียนที่อนุมัติในคอร์สนี้');
+  } else {
+    res.records.forEach(function(r, i){
+      h += '<div class="trow"><div class="trow-nm">'+(i+1)+'. '+esc(r.student_name)+'</div>'
+        + '<div class="tseg" data-eid="'+r.enrollment_id+'">'
+        + ['present','late','absent','leave'].map(function(st){
+            return '<button data-st="'+st+'" class="'+(r.status===st?'on '+st:'')+'" onclick="setTeacherSt(this,\''+r.enrollment_id+'\',\''+st+'\')">'+ST_TH[st]+'</button>';
+          }).join('')
+        + '</div></div>';
+    });
+    h += '<button class="btn btn-primary" id="btnSaveTAtt" style="margin-top:6px">'+svg('ic-check')+' บันทึกเช็คชื่อ</button>';
+  }
+  render(h);
+  const dEl = document.getElementById('tDate');
+  if(dEl) dEl.onchange = function(){ TCUR.date = this.value; fetchTeacherAttendance(); };
+  const saveBtn = document.getElementById('btnSaveTAtt');
+  if(saveBtn) saveBtn.onclick = saveTeacherAttendance;
+}
+
+function setTeacherSt(btn, enrollId, st){
+  const seg = btn.closest('.tseg');
+  seg.querySelectorAll('button').forEach(function(b){ b.className = ''; });
+  btn.className = 'on '+st;
+  const r = TCUR.records.find(function(x){ return x.enrollment_id===enrollId; });
+  if(r) r.status = st;
+}
+
+async function saveTeacherAttendance(){
+  const btn = document.getElementById('btnSaveTAtt'); btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+  const payload = { course_id: TCUR.courseId, date: TCUR.date,
+    records: TCUR.records.map(function(r){ return { enrollment_id:r.enrollment_id, student_name:r.student_name, status:r.status, note:'' }; }) };
+  try{
+    const res = await api('saveCourseAttendanceLiff', { line_user_id: PROFILE.userId, payload: payload });
+    if(res.status==='success'){ toast(res.message); fetchTeacherAttendance(); }
+    else { toast(res.message||'บันทึกไม่สำเร็จ'); btn.disabled=false; btn.innerHTML=svg('ic-check')+' บันทึกเช็คชื่อ'; }
+  }catch(e){ toast('เกิดข้อผิดพลาด'); btn.disabled=false; btn.innerHTML=svg('ic-check')+' บันทึกเช็คชื่อ'; }
+}
+
+function renderTeacherSettingsTab(){
+  const name = (TEACHER && TEACHER.name) || '-';
+  render('<div class="set-card"><div class="set-row">'
+      + '<span class="set-av">'+initials(name)+'</span>'
+      + '<div><div class="set-nm">'+esc(name)+'</div><div class="set-sub">เชื่อมต่อผ่านบัญชี LINE (ครู)</div></div>'
+      + '</div></div>'
+    + '<div class="set-card"><div class="section-title">บัญชีและความเป็นส่วนตัว</div>'
+      + '<p class="set-sub" style="margin:0 0 14px">ยกเลิกการเชื่อมต่อจะทำให้ไม่เห็นเมนูเช็คชื่อที่นี่อีก จนกว่าจะเชื่อมต่อใหม่</p>'
+      + '<button class="btn btn-danger" id="btnUnlinkT">ยกเลิกการเชื่อมต่อบัญชี LINE</button>'
+    + '</div>');
+  document.getElementById('btnUnlinkT').onclick = function(){
+    openConfirm('ยกเลิกการเชื่อมต่อบัญชี LINE?', 'คุณจะไม่เห็นเมนูเช็คชื่อที่นี่อีก จนกว่าจะเชื่อมต่อใหม่', doUnlinkTeacher);
+  };
+}
+async function doUnlinkTeacher(){
+  const btn = document.getElementById('cfYes');
+  if(btn){ btn.disabled = true; btn.textContent = 'กำลังดำเนินการ...'; }
+  try{
+    const res = await api('unlinkLiff', { line_user_id: PROFILE.userId });
+    closeSheet();
+    if(res.status==='success'){ toast(res.message); setTimeout(function(){ location.reload(); }, 1200); }
+    else { toast(res.message || 'ไม่สำเร็จ'); }
+  }catch(e){ closeSheet(); toast('เกิดข้อผิดพลาด'); }
 }
 
 boot();
