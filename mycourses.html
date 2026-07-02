@@ -236,7 +236,7 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
       <div><h1 id="pageTitle">คอร์สของบุตรหลาน</h1>
       <p id="headSub">การมาเรียน · ผลการเรียน · แจ้งลา</p></div>
     </div>
-    <span class="head-badge">ปีการศึกษา 2569</span>
+    <span class="head-badge hidden" id="headBadge">ปีการศึกษา 2569</span>
   </div>
 </div>
 
@@ -286,6 +286,7 @@ async function load(){
     ROLE = 'parent'; STATE = res.data;
     document.getElementById('pageTitle').textContent = 'คอร์สของบุตรหลาน';
     document.getElementById('headSub').textContent = 'สวัสดีค่ะ คุณ'+(PROFILE.displayName||'');
+    document.getElementById('headBadge').classList.remove('hidden');
     setHeadAvatar();
     renderActiveTab();
     renderNav();
@@ -296,6 +297,7 @@ async function load(){
     ROLE = 'teacher'; TEACHER = tRes.user; TEACHER_COURSES = tRes.courses||[];
     document.getElementById('pageTitle').textContent = 'เช็คชื่อคอร์สเรียน';
     document.getElementById('headSub').textContent = 'สวัสดีคุณครู '+(TEACHER.name||'');
+    document.getElementById('headBadge').classList.remove('hidden');
     setHeadAvatar();
     TAB = 'thome';
     renderActiveTab();
@@ -308,7 +310,9 @@ async function load(){
 /* ---------- หน้าเลือกบทบาท (ครั้งแรกที่ยังไม่เชื่อมบัญชี) ---------- */
 function renderChoicePage(){
   document.getElementById('pageTitle').textContent = 'ระบบคอร์สเรียน';
-  document.getElementById('headSub').textContent = 'เชื่อมต่อบัญชี LINE';
+  document.getElementById('headSub').textContent = 'เลือกบทบาทเพื่อเริ่มใช้งาน';
+  document.getElementById('headBadge').classList.add('hidden');
+  setHeadAvatar();
   render('<div style="text-align:center;margin-bottom:18px;color:var(--soft);font-size:13.5px">ท่านเป็น...</div>'
     + '<div class="choice-card" onclick="renderParentChoice()">'
       + '<div class="choice-ic parent">'+svg('ic-users')+'</div>'
