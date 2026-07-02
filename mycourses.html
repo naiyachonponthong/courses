@@ -410,20 +410,20 @@ function renderParentLinkForm(){
   render('<div class="link-back" onclick="renderParentChoice()">'+svg('ic-arrow-left')+'ย้อนกลับ</div>'
     + '<div class="kid">'
     + '<div style="font-weight:700;font-size:15px;margin-bottom:4px">เชื่อมบัญชีผู้ปกครอง</div>'
-    + '<div style="font-size:12.5px;color:var(--soft);margin-bottom:16px">กรอกเลขที่ใบสมัคร (เช่น EN-690630-4821 ที่ได้รับตอนสมัคร) และเบอร์โทรที่ใช้ตอนสมัคร</div>'
-    + '<div class="field"><label>เลขที่ใบสมัคร</label><input class="ctl" id="pcRef" placeholder="EN-XXXXXX-XXXX" autocomplete="off"></div>'
+    + '<div style="font-size:12.5px;color:var(--soft);margin-bottom:16px">กรอกรหัสประจำตัวนักเรียน และเบอร์โทรที่ใช้ตอนสมัคร</div>'
+    + '<div class="field"><label>รหัสประจำตัวนักเรียน</label><input class="ctl" id="pcCode" placeholder="เช่น 12345" autocomplete="off"></div>'
     + '<div class="field"><label>เบอร์โทร</label><input class="ctl" id="pcPhone" type="tel" placeholder="08XXXXXXXX" autocomplete="off"></div>'
     + '<button class="btn btn-primary" id="btnPLink">'+svg('ic-user-check')+' เชื่อมต่อ</button>'
     + '</div>');
   document.getElementById('btnPLink').onclick = doParentLink;
 }
 async function doParentLink(){
-  const ref = document.getElementById('pcRef').value.trim();
+  const code = document.getElementById('pcCode').value.trim();
   const phone = document.getElementById('pcPhone').value.trim();
-  if(!ref || !phone){ toast('กรุณากรอกให้ครบ'); return; }
+  if(!code || !phone){ toast('กรุณากรอกให้ครบ'); return; }
   const btn = document.getElementById('btnPLink'); btn.disabled = true; btn.textContent = 'กำลังเชื่อมต่อ...';
   try{
-    const res = await api('linkParentEnrollmentLiff', { line_user_id: PROFILE.userId, ref: ref, phone: phone });
+    const res = await api('linkParentEnrollmentLiff', { line_user_id: PROFILE.userId, student_code: code, phone: phone });
     if(res.status==='success'){ toast('เชื่อมต่อสำเร็จ'); load(); }
     else { toast(res.message||'ไม่สำเร็จ'); btn.disabled=false; btn.innerHTML=svg('ic-user-check')+' เชื่อมต่อ'; }
   }catch(e){ toast('เกิดข้อผิดพลาด'); btn.disabled=false; btn.innerHTML=svg('ic-user-check')+' เชื่อมต่อ'; }
@@ -469,15 +469,20 @@ const NAV_ITEMS = [
   { id:'results', label:'ผลการเรียน', icon:'ic-award' },
   { id:'settings', label:'ตั้งค่า', icon:'ic-settings' }
 ];
-const TEACHER_NAV_ITEMS = [
-  { id:'thome', label:'เช็คชื่อ', icon:'ic-user-check' },
-  { id:'tleave', label:'ยื่นใบลา', icon:'ic-cal-x' },
-  { id:'thistory', label:'ใบลาของฉัน', icon:'ic-inbox' },
-  { id:'tsettings', label:'ตั้งค่า', icon:'ic-settings' }
-];
+const APPROVER_ROLES = ['admin','director','deputy','academic','head_dept','homeroom'];
+function getTeacherNavItems(){
+  const items = [{ id:'thome', label:'เช็คชื่อ', icon:'ic-user-check' }];
+  if(TEACHER && APPROVER_ROLES.indexOf(TEACHER.role)!==-1){
+    items.push({ id:'tapprove', label:'อนุมัติ', icon:'ic-check' });
+  }
+  items.push({ id:'tleave', label:'ยื่นใบลา', icon:'ic-cal-x' });
+  items.push({ id:'thistory', label:'ใบลาของฉัน', icon:'ic-inbox' });
+  items.push({ id:'tsettings', label:'ตั้งค่า', icon:'ic-settings' });
+  return items;
+}
 let TAB = 'home';
 function renderNav(){
-  const items = ROLE==='teacher' ? TEACHER_NAV_ITEMS : NAV_ITEMS;
+  const items = ROLE==='teacher' ? getTeacherNavItems() : NAV_ITEMS;
   let h = '<div class="bottomnav-in">';
   items.forEach(function(n){
     if(n.id==='__fab__'){
@@ -497,6 +502,7 @@ function renderActiveTab(){
     if(TAB==='tsettings') renderTeacherSettingsTab();
     else if(TAB==='tleave') renderTeacherLeaveFormTab();
     else if(TAB==='thistory') renderTeacherLeaveHistoryTab();
+    else if(TAB==='tapprove') renderTeacherApproveTab();
     else renderTeacherHome();
     return;
   }
@@ -879,6 +885,49 @@ async function renderTeacherLeaveHistoryTab(){
   else TEACHER_LEAVES.forEach(function(l){ h += teacherLeaveItem(l); });
   render(h);
 }
+
+/* ---------- ครู: อนุมัติใบลา (เฉพาะบทบาทที่อยู่ในสายการอนุมัติ) ---------- */
+let TEACHER_QUEUE = [];
+async function renderTeacherApproveTab(){
+  render('<div class="loading"><div class="spin"></div>กำลังโหลด...</div>');
+  const res = await api('getLeavesForApproval', { line_user_id: PROFILE.userId });
+  TEACHER_QUEUE = (res.status==='success') ? res.leaves : [];
+
+  let h = '<div class="group-label">รออนุมัติจากคุณ</div>';
+  if(!TEACHER_QUEUE.length) h += emptyState('ไม่มีรายการรออนุมัติ');
+  else TEACHER_QUEUE.forEach(function(l){ h += approveQueueItem(l); });
+  render(h);
+}
+function approveQueueItem(l){
+  const typeLabel = LEAVE_TYPES_T[l.leave_type] || l.leave_type;
+  const who = l.subject_type==='teacher' ? (l.teacher_name||'-') : (l.student_name||'-');
+  return '<div class="lv-item" style="cursor:default"><div class="lv-top">'
+    + '<span class="lv-type">'+esc(who)+(l.class_name?' <span style="font-weight:400;color:var(--soft)">· '+esc(l.class_name)+'</span>':'')+'</span>'
+    + '<span class="lv-badge pending">'+esc(typeLabel)+'</span></div>'
+    + '<div class="lv-meta">'+thaiDate(l.date_from)+(l.date_to&&l.date_to!==l.date_from?' – '+thaiDate(l.date_to):'')+' · '+(l.days||1)+' วัน</div>'
+    + (l.reason?'<div class="lv-reason">'+esc(l.reason)+'</div>':'')
+    + '<div style="display:flex;gap:8px;margin-top:12px">'
+      + '<button class="btn btn-primary" style="flex:1;width:auto;padding:10px" onclick="doApproveLeave(\''+l.id+'\')">'+svg('ic-check')+' อนุมัติ</button>'
+      + '<button class="btn btn-danger" style="flex:1;width:auto;padding:10px" onclick="doRejectLeave(\''+l.id+'\')">'+svg('ic-x')+' ไม่อนุมัติ</button>'
+    + '</div></div>';
+}
+function doApproveLeave(id){
+  openConfirm('อนุมัติใบลานี้?', 'ยืนยันอนุมัติคำขอลานี้', function(){ submitApproveDecision(id, 'approveLeaveLiff'); });
+}
+function doRejectLeave(id){
+  openConfirm('ไม่อนุมัติใบลานี้?', 'ยืนยันปฏิเสธคำขอลานี้', function(){ submitApproveDecision(id, 'rejectLeaveLiff'); });
+}
+async function submitApproveDecision(id, action){
+  const btn = document.getElementById('cfYes');
+  if(btn){ btn.disabled = true; btn.textContent = 'กำลังดำเนินการ...'; }
+  try{
+    const res = await api(action, { line_user_id: PROFILE.userId, leave_id: id });
+    closeSheet();
+    if(res.status==='success'){ toast(res.message); renderTeacherApproveTab(); }
+    else toast(res.message||'ไม่สำเร็จ');
+  }catch(e){ closeSheet(); toast('เกิดข้อผิดพลาด'); }
+}
+
 function pickTLtype(btn){
   document.querySelectorAll('.ltype-btn').forEach(function(b){ b.classList.remove('on'); });
   btn.classList.add('on');
