@@ -204,8 +204,10 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 .choice-sub{ font-size:12px; color:var(--soft); margin-top:2px; }
 .choice-chev{ flex:none; color:var(--mut); }
 .choice-chev .i{ width:14px; height:14px; transform:rotate(-90deg); }
-.link-back{ display:flex; align-items:center; gap:8px; color:var(--soft); font-size:13.5px; cursor:pointer; margin-bottom:16px; font-weight:600; }
-.link-back .i{ width:16px; height:16px; }
+.link-back{ display:inline-flex; align-items:center; gap:7px; color:var(--ink); font-size:13px; cursor:pointer; font-weight:600;
+  background:#fff; padding:9px 15px 9px 12px; border-radius:999px; box-shadow:var(--shadow-sm); margin:2px 0 16px; }
+.link-back:active{ background:var(--bg); }
+.link-back .i{ width:15px; height:15px; }
 
 /* teacher: course list */
 .tc-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-sm); padding:13px 15px; margin-bottom:10px;
