@@ -215,6 +215,21 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 .tseg button.on.absent{ background:var(--red-50); border-color:var(--red); color:var(--red); }
 .tseg button.on.leave{ background:var(--blue-50); border-color:var(--blue); color:var(--blue); }
 .saved-note{ font-size:11.5px; color:var(--soft); margin-bottom:10px; }
+
+/* teacher: ยื่นใบลาของตัวเอง */
+.ltype-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.ltype-btn{ border:1.5px solid var(--line); background:#fff; border-radius:11px; padding:10px 6px; font-size:12.5px; cursor:pointer;
+  color:var(--soft); font-weight:600; font-family:inherit; text-align:center; }
+.ltype-btn.on{ background:var(--brand); border-color:var(--brand); color:#fff; }
+.lv-item{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-sm); padding:13px 15px; margin-bottom:10px; }
+.lv-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.lv-type{ font-weight:700; font-size:14px; }
+.lv-badge{ font-size:11px; font-weight:700; padding:4px 11px; border-radius:999px; white-space:nowrap; flex:none; }
+.lv-badge.pending{ background:var(--gold-50); color:var(--gold); }
+.lv-badge.approved{ background:var(--green-50); color:var(--green); }
+.lv-badge.rejected{ background:var(--red-50); color:var(--red); }
+.lv-meta{ font-size:12px; color:var(--soft); margin-top:5px; }
+.lv-reason{ font-size:12.5px; margin-top:6px; color:var(--ink); }
 </style>
 </head>
 <body>
@@ -262,7 +277,10 @@ body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Prompt','Sa
 let PROFILE = null, STATE = [];
 let ROLE = '', TEACHER = null, TEACHER_COURSES = [];
 let TCUR = { courseId:'', date:'', records:[] };
+let TEACHER_LEAVES = [], tLeavePendingPhoto = null;
 const ST_TH = { present:'มา', late:'สาย', absent:'ขาด', leave:'ลา' };
+const LEAVE_TYPES_T = { sick:'ลาป่วย', personal:'ลากิจ', vacation:'ลาพักผ่อน', official:'ไปราชการ', maternity:'ลาคลอด', other:'อื่นๆ' };
+const LEAVE_STATUS_TH = { pending:'รออนุมัติ', approved:'อนุมัติแล้ว', rejected:'ไม่อนุมัติ' };
 
 function esc(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function initials(n){ return (n||'?').trim().charAt(0); }
@@ -386,6 +404,7 @@ const NAV_ITEMS = [
 ];
 const TEACHER_NAV_ITEMS = [
   { id:'thome', label:'เช็คชื่อ', icon:'ic-user-check' },
+  { id:'tleave', label:'ลา', icon:'ic-cal-x' },
   { id:'tsettings', label:'ตั้งค่า', icon:'ic-settings' }
 ];
 let TAB = 'home';
@@ -408,6 +427,7 @@ function setTab(t){ TAB = t; renderActiveTab(); renderNav(); window.scrollTo(0,0
 function renderActiveTab(){
   if(ROLE==='teacher'){
     if(TAB==='tsettings') renderTeacherSettingsTab();
+    else if(TAB==='tleave') renderTeacherLeaveTab();
     else renderTeacherHome();
     return;
   }
@@ -750,6 +770,81 @@ async function saveTeacherAttendance(){
     if(res.status==='success'){ toast(res.message); fetchTeacherAttendance(); }
     else { toast(res.message||'บันทึกไม่สำเร็จ'); btn.disabled=false; btn.innerHTML=svg('ic-check')+' บันทึกเช็คชื่อ'; }
   }catch(e){ toast('เกิดข้อผิดพลาด'); btn.disabled=false; btn.innerHTML=svg('ic-check')+' บันทึกเช็คชื่อ'; }
+}
+
+/* ---------- ครู: ยื่นใบลาของตัวเอง ---------- */
+async function renderTeacherLeaveTab(){
+  render('<div class="loading"><div class="spin"></div>กำลังโหลด...</div>');
+  const res = await api('teacherLiffInit', { line_user_id: PROFILE.userId });
+  TEACHER_LEAVES = (res.status==='success') ? res.leaves : [];
+  tLeavePendingPhoto = null;
+
+  let typeChips = '<div class="ltype-grid">';
+  Object.keys(LEAVE_TYPES_T).forEach(function(k, i){
+    typeChips += '<button type="button" class="ltype-btn'+(i===0?' on':'')+'" data-v="'+k+'" onclick="pickTLtype(this)">'+LEAVE_TYPES_T[k]+'</button>';
+  });
+  typeChips += '</div>';
+
+  let h = '<div class="kid">'
+    + '<div style="font-weight:700;font-size:15.5px;margin-bottom:12px">ยื่นใบลา</div>'
+    + '<div class="field"><label>ประเภทการลา</label>'+typeChips+'</div>'
+    + '<div class="field"><label>ตั้งแต่วันที่</label><input type="date" class="ctl" id="tlFrom" value="'+today()+'"></div>'
+    + '<div class="field"><label>ถึงวันที่</label><input type="date" class="ctl" id="tlTo" value="'+today()+'"></div>'
+    + '<div class="field"><label>เหตุผล</label><textarea class="ctl" id="tlReason" rows="3" placeholder="ระบุเหตุผล (ไม่บังคับ)"></textarea></div>'
+    + '<div class="field"><label>แนบเอกสาร (ไม่บังคับ)</label><input type="file" class="ctl" id="tlPhoto" accept="image/*"></div>'
+    + '<button class="btn btn-primary" id="btnTLeaveSubmit">'+svg('ic-check')+' ส่งใบลา</button>'
+    + '</div>';
+
+  h += '<div class="group-label">ใบลาของฉัน</div>';
+  if(!TEACHER_LEAVES.length) h += emptyState('ยังไม่มีประวัติการลา');
+  else TEACHER_LEAVES.forEach(function(l){ h += teacherLeaveItem(l); });
+
+  render(h);
+  document.getElementById('tlPhoto').onchange = function(){
+    const f = this.files[0]; if(!f) return;
+    if(f.size > 4*1024*1024){ toast('ไฟล์ต้องไม่เกิน 4MB'); this.value=''; return; }
+    const r = new FileReader(); r.onload = function(e){ tLeavePendingPhoto = e.target.result; }; r.readAsDataURL(f);
+  };
+  document.getElementById('btnTLeaveSubmit').onclick = submitTeacherLeave;
+}
+function pickTLtype(btn){
+  document.querySelectorAll('.ltype-btn').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+}
+function teacherLeaveItem(l){
+  const st = l.status || 'pending';
+  let curLevel = '';
+  if(st==='pending' && l.approvals){
+    const cur = l.approvals.find(function(a){ return a.status==='pending'; });
+    if(cur) curLevel = ' · รอ'+esc(cur.role_label||'');
+  }
+  return '<div class="lv-item"><div class="lv-top">'
+    + '<span class="lv-type">'+(LEAVE_TYPES_T[l.leave_type]||l.leave_type)+'</span>'
+    + '<span class="lv-badge '+st+'">'+(LEAVE_STATUS_TH[st]||st)+'</span></div>'
+    + '<div class="lv-meta">'+thaiDate(l.date_from)+(l.date_to&&l.date_to!==l.date_from?' – '+thaiDate(l.date_to):'')+' · '+(l.days||1)+' วัน'+curLevel+'</div>'
+    + (l.reason?'<div class="lv-reason">'+esc(l.reason)+'</div>':'')
+    + '</div>';
+}
+async function submitTeacherLeave(){
+  const typeEl = document.querySelector('.ltype-btn.on');
+  const payload = {
+    line_user_id: PROFILE.userId,
+    leave_type: typeEl ? typeEl.getAttribute('data-v') : 'sick',
+    date_from: document.getElementById('tlFrom').value,
+    date_to: document.getElementById('tlTo').value,
+    reason: document.getElementById('tlReason').value.trim(),
+    photo: tLeavePendingPhoto || ''
+  };
+  if(!payload.date_from){ toast('กรุณาเลือกวันที่'); return; }
+  const btn = document.getElementById('btnTLeaveSubmit'); btn.disabled = true; btn.textContent = 'กำลังส่ง...';
+  try{
+    const res = await api('submitTeacherLeaveLiff', payload);
+    if(res.status==='success'){
+      toast(res.message);
+      if(liff.isInClient()){ try{ await liff.sendMessages([{type:'text', text:'ยื่นใบลาเรียบร้อยแล้ว รอการอนุมัติ'}]); }catch(e){} }
+      renderTeacherLeaveTab();
+    } else { toast(res.message||'ส่งไม่สำเร็จ'); btn.disabled=false; btn.innerHTML=svg('ic-check')+' ส่งใบลา'; }
+  }catch(e){ toast('เกิดข้อผิดพลาด'); btn.disabled=false; btn.innerHTML=svg('ic-check')+' ส่งใบลา'; }
 }
 
 function renderTeacherSettingsTab(){
